@@ -65,14 +65,62 @@ spikes = import_spikes('inputs_spike.mat')
 # plt.ylim(-0.1, 0.2)
 # plt.show()
 
-# Plotting spike times
+
+def find_nearest_idx(array, val):
+    return (np.abs(array-val)).argmin()
+
+
+def time_slice(spikes, t_start, t_stop):
+    """
+    Creates a new spike train sliced to the time interval given by start
+    and end times (inclusive). Start or end times can also be None to use
+    infinite endpoints for the time interval.
+    :param spikes: spike train to be modified
+    :param t_start: start interval
+    :param t_stop: end interval
+    :return: sliced_spikes: based on interval times
+    """
+    if t_start is None:
+        t_start = -np.inf
+    if t_stop is None:
+        t_end = np.inf
+    indices = (spikes >= t_start) & (spikes <= t_stop)
+    sliced_spikes = spikes[indices]
+    return sliced_spikes
+
+t_start = 3660
+t_stop = 3720
+
+# sliced = dict(time=[])
 # for neuron in range(len(spikes['time'])):
-#     plt.plot(spikes['time'][neuron], np.ones(len(spikes['time'][neuron]))+neuron+1, '|', color='k')
-# plt.xlim(3660, 3720)
+#     sliced['time'].append(time_slice(spikes['time'][neuron], t_start, t_stop))
+#
+# print str(len(spikes['time'])) + ' should equal ' + str(len(sliced['time']))
+#
+# for neuron in range(len(spikes['time'])):
+#     plt.plot(sliced['time'][neuron], np.ones(len(sliced['time'][neuron]))+neuron+1,
+#              '|', color='g')
+# plt.xlim(3650, 3730)
 # plt.ylabel('Neuron number')
 # plt.xlabel('Time (ms?)')
-# plt.title('Check it out! I can plot spikes!')
+# plt.title('Check it out!!! I can slice spikes!')
+# plt.show()
+
+
+# t_start_idx = find_nearest_idx(np.array(csc['time']), t_start)
+# t_end_idx = find_nearest_idx(np.array(csc['time']), t_stop)
+#
+# sliced_csc = dict()
+# sliced_csc['data'] = csc['data'][t_start_idx:t_end_idx]
+# sliced_csc['time'] = csc['time'][t_start_idx:t_end_idx]
+#
+# plt.plot(sliced_csc['time'], sliced_csc['data'], 'b')
+# plt.xlim(3650, 3730)
 # plt.show()
 
 
 
+# Notes:
+# - function to restrict to interval
+# - function to make tuning curve from spikes/times
+# - tests? eg. time sliced spikes should have same neuron number as non-sliced
