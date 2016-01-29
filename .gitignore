@@ -1,0 +1,19 @@
+# Matlab generated files #
+##############################
+*.asv
+
+# Python generated files #
+##############################
+*.pyc
+
+# Other #
+##############################
+*.png
+Thumbs.db
+*.mat
+*.eps
+*.fig
+
+# PyCharm project thing #
+##############################
+.idea

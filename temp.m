@@ -1,6 +1,7 @@
-cd('C:\Users\Emily\Desktop\R042-2013-08-18');
+filepath = 'C:\Users\Emily\Desktop\R042-2013-08-18';
 
 %% input_csc
+cd(filepath);
 cfg_csc = [];
 cfg_csc.fc = {'R042-2013-08-18-CSC11a.ncs'};
 csc = LoadCSC(cfg_csc);
@@ -14,6 +15,7 @@ save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\inputs_csc', ...
     'csc_data', 'csc_tvec', 'csc_type', 'csc_label')
 
 %% input_positions
+cd(filepath);
 cfg_pos = [];
 position = LoadPos(cfg_pos);
 
@@ -27,6 +29,7 @@ save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\inputs_position', ...
     'pos_datax', 'pos_datay', 'pos_tvec', 'pos_type', 'pos_label')
 
 %% input_events
+cd(filepath);
 cfg_evt = [];
 cfg_evt.eventList = {'TTL Output on AcqSystem1_0 board 0 port 0 value (0x0004).','TTL Output on AcqSystem1_0 board 0 port 0 value (0x0040).'};
 cfg_evt.eventLabel = {'FoodDelivery','WaterDelivery'};
@@ -42,6 +45,7 @@ save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\inputs_event', ...
     'evt_food', 'evt_water', 'evt_type', 'evt_label')
 
 %% input_spikes
+cd(filepath);
 cfg_spk = [];
 
 spikes = LoadSpikes(cfg_spk);
