@@ -44,14 +44,35 @@ def import_spikes(matfile):
     return spikes
 
 
-# csc = import_csc('inputs_csc.mat')
-# pos = import_position('inputs_position.mat')
-# events = import_events('inputs_event.mat')
-
+csc = import_csc('inputs_csc.mat')
+pos = import_position('inputs_position.mat')
+events = import_events('inputs_event.mat')
 spikes = import_spikes('inputs_spike.mat')
 
-plt.plot(spikes['time'], np.ones(len(spikes['time'])), color='g')
-plt.show()
+# Plotting lfp
+# plt.plot(csc['time'], csc['data'], 'k')
+# plt.xlim(3660, 3720)
+# plt.show()
+
+# Plotting position
+# plt.plot(pos['x'], pos['y'], 'g.', ms=2)
+# plt.axis('off')
+# plt.show()
+
+# Plotting event times
+# plt.plot(events['food'], np.zeros(len(events['food'])), '|', color='g', ms=200)
+# plt.plot(events['water'], np.zeros(len(events['water'])), '|', color='b', ms=200)
+# plt.ylim(-0.1, 0.2)
+# plt.show()
+
+# Plotting spike times
+# for neuron in range(len(spikes['time'])):
+#     plt.plot(spikes['time'][neuron], np.ones(len(spikes['time'][neuron]))+neuron+1, '|', color='k')
+# plt.xlim(3660, 3720)
+# plt.ylabel('Neuron number')
+# plt.xlabel('Time (ms?)')
+# plt.title('Check it out! I can plot spikes!')
+# plt.show()
 
 
 
