@@ -83,24 +83,25 @@ def time_slice(spikes, t_start, t_stop):
     if t_start is None:
         t_start = -np.inf
     if t_stop is None:
-        t_end = np.inf
+        t_stop = np.inf
     indices = (spikes >= t_start) & (spikes <= t_stop)
     sliced_spikes = spikes[indices]
     return sliced_spikes
 
-t_start = 3660
-t_stop = 3720
+event = events['food'][0]
+t_start = event - 1
+t_stop = event + 1
 
-# sliced = dict(time=[])
+# sliced_spikes = dict(time=[])
 # for neuron in range(len(spikes['time'])):
-#     sliced['time'].append(time_slice(spikes['time'][neuron], t_start, t_stop))
+#     sliced_spikes['time'].append(time_slice(spikes['time'][neuron], t_start, t_stop))
 #
-# print str(len(spikes['time'])) + ' should equal ' + str(len(sliced['time']))
+# print str(len(spikes['time'])) + ' should equal ' + str(len(sliced_spikes['time']))
 #
 # for neuron in range(len(spikes['time'])):
-#     plt.plot(sliced['time'][neuron], np.ones(len(sliced['time'][neuron]))+neuron+1,
-#              '|', color='g')
-# plt.xlim(3650, 3730)
+#     plt.plot(sliced_spikes['time'][neuron], np.ones(len(sliced_spikes['time'][neuron]))+neuron+1,
+#              '|', color='k')
+# plt.plot(events['food'][0], np.zeros(np.array(events['food'][0]).size)+(len(sliced_spikes['time'])/2.), '|', color='r', ms=300)
 # plt.ylabel('Neuron number')
 # plt.xlabel('Time (ms?)')
 # plt.title('Check it out!!! I can slice spikes!')
@@ -114,8 +115,8 @@ t_stop = 3720
 # sliced_csc['data'] = csc['data'][t_start_idx:t_end_idx]
 # sliced_csc['time'] = csc['time'][t_start_idx:t_end_idx]
 #
-# plt.plot(sliced_csc['time'], sliced_csc['data'], 'b')
-# plt.xlim(3650, 3730)
+# plt.plot(sliced_csc['time'], sliced_csc['data'], 'y')
+# plt.plot(events['food'][0], np.zeros(1), '|', color='k', ms=300)
 # plt.show()
 
 
