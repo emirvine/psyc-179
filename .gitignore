@@ -16,4 +16,4 @@ Thumbs.db
 
 # PyCharm project thing #
 ##############################
-.idea
+*.idea/
