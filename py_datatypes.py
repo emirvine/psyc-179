@@ -67,10 +67,10 @@ def time_slice(spikes, t_start, t_stop):
     sliced_spikes = spikes[indices]
     return sliced_spikes
 
-csc = import_csc('inputs_csc.mat')
-pos = import_position('inputs_position.mat')
-events = import_events('inputs_event.mat')
-spikes = import_spikes('inputs_spike.mat')
+# csc = import_csc('inputs_csc.mat')
+# pos = import_position('inputs_position.mat')
+# events = import_events('inputs_event.mat')
+# spikes = import_spikes('inputs_spike.mat')
 
 
 # Plotting lfp
@@ -78,32 +78,7 @@ spikes = import_spikes('inputs_spike.mat')
 # plt.xlim(3660, 3720)
 # plt.show()
 
-notes = dict()
-notes['start_box'] = [237.1, 243.4]
-notes['choice_point'] = [589.9, 243.4]
-notes['top_pedestal'] = [348.6, 376.8]
-notes['bottom_pedestal'] = [348.6, 137.5]
-notes['top_reward'] = [448.8, 473.6]
-notes['bottom_reward'] = [448.8, 39.5]
-notes['top_turn1'] = [578.6, 417.4]
-notes['top_turn2'] = [498.2, 472.2]
-notes['bottom_turn1'] = [572.9, 95.7]
-notes['bottom_turn2'] = [485.4, 31.6]
 
-# Plotting position
-plt.plot(pos['x'], pos['y'], 'g.', ms=2)
-plt.plot(notes['start_box'][0], notes['start_box'][1], 'b.', ms=12)
-plt.plot(notes['choice_point'][0], notes['choice_point'][1], 'b.', ms=12)
-plt.plot(notes['top_pedestal'][0], notes['top_pedestal'][1], 'b.', ms=12)
-plt.plot(notes['bottom_pedestal'][0], notes['bottom_pedestal'][1], 'b.', ms=12)
-plt.plot(notes['top_reward'][0], notes['top_reward'][1], 'b.', ms=12)
-plt.plot(notes['bottom_reward'][0], notes['bottom_reward'][1], 'b.', ms=12)
-plt.plot(notes['top_turn1'][0], notes['top_turn1'][1], 'r.', ms=12)
-plt.plot(notes['top_turn2'][0], notes['top_turn2'][1], 'r.', ms=12)
-plt.plot(notes['bottom_turn1'][0], notes['bottom_turn1'][1], 'r.', ms=12)
-plt.plot(notes['bottom_turn2'][0], notes['bottom_turn2'][1], 'r.', ms=12)
-plt.axis('off')
-plt.show()
 
 
 
