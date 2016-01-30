@@ -68,6 +68,26 @@ def time_slice(spikes, t_start, t_stop):
     sliced_spikes = spikes[indices]
     return sliced_spikes
 
+
+def linear_trajectory(pos, ideal_path, trial_start, trial_stop):
+    for trial in range(len(trial_start)):
+        t_start_idx = find_nearest_idx(np.array(pos['time']), trial_start[trial])
+        t_end_idx = find_nearest_idx(np.array(pos['time']), trial_stop[trial])
+
+        pos_trial = dict()
+        pos_trial['x'] = pos['x'][t_start_idx:t_end_idx]
+        pos_trial['y'] = pos['y'][t_start_idx:t_end_idx]
+        pos_trial['time'] = pos['time'][t_start_idx:t_end_idx]
+
+        linear_pos = dict(x=[], y=[])
+        linear_pos['time'] = pos_trial['time']
+        for point in range(len(pos_trial['x'])-1):
+            position = Point(pos_trial['x'][point], pos_trial['y'][point])
+            linearized_point = ideal_path.interpolate(ideal_path.project(position))
+            linear_pos['x'].append(linearized_point.xy[0])
+            linear_pos['y'].append(linearized_point.xy[1])
+    return linear_pos
+
 csc = import_csc('inputs_csc.mat')
 pos = import_position('inputs_position.mat')
 events = import_events('inputs_event.mat')
@@ -79,16 +99,11 @@ spikes = import_spikes('inputs_spike.mat')
 # plt.xlim(3660, 3720)
 # plt.show()
 
-
-
-
-
 # Plotting event times
 # plt.plot(events['food'], np.zeros(len(events['food'])), '|', color='g', ms=200)
 # plt.plot(events['water'], np.zeros(len(events['water'])), '|', color='b', ms=200)
 # plt.ylim(-0.1, 0.2)
 # plt.show()
-
 
 # event = events['food'][0]
 # t_start = event - 1
@@ -153,35 +168,16 @@ water_stops = [3282.1, 3605.4, 3754.9, 3905.5, 4170.3, 4982.1, 5106.4, 5232.3, 5
 food_starts = [3433.5, 4015.4, 4267.6, 4404.5, 4540.3, 4703.8, 4822.6, 5749.6, 5583.6]
 food_stops = [3448.2, 4044.4, 4284.5, 4420.4, 4583.4, 4718.8, 4870.3, 5491.3, 5622.4]
 
-plt.plot(pos['x'], pos['y'], 'k')
-for trial in range(len(food_starts)):
-    t_start_idx = find_nearest_idx(np.array(pos['time']), food_starts[trial])
-    t_end_idx = find_nearest_idx(np.array(pos['time']), food_stops[trial])
-
-    sliced_pos = dict()
-    sliced_pos['x'] = pos['x'][t_start_idx:t_end_idx]
-    sliced_pos['y'] = pos['y'][t_start_idx:t_end_idx]
-    sliced_pos['time'] = pos['time'][t_start_idx:t_end_idx]
-
-    plt.plot(sliced_pos['x'], sliced_pos['y'], 'g')
-
-plt.plot(food_line.xy[0], food_line.xy[1], 'c', ms=40)
+# Linear paths for food and water trials.
+plt.plot(pos['x'], pos['y'], 'y')
+linear_food = linear_trajectory(pos, food_line, food_starts, food_stops)
+linear_water = linear_trajectory(pos, water_line, water_starts, water_stops)
+plt.plot(linear_food['x'], linear_food['y'], 'k', ms=40)
+plt.plot(linear_water['x'], linear_water['y'], 'g', ms=40)
 plt.show()
 
-plt.plot(pos['x'], pos['y'], 'k')
-for trial in range(len(water_starts)):
-    t_start_idx = find_nearest_idx(np.array(pos['time']), water_starts[trial])
-    t_end_idx = find_nearest_idx(np.array(pos['time']), water_stops[trial])
 
-    sliced_pos = dict()
-    sliced_pos['x'] = pos['x'][t_start_idx:t_end_idx]
-    sliced_pos['y'] = pos['y'][t_start_idx:t_end_idx]
-    sliced_pos['time'] = pos['time'][t_start_idx:t_end_idx]
 
-    plt.plot(sliced_pos['x'], sliced_pos['y'], 'b')
-
-plt.plot(water_line.xy[0], water_line.xy[1], 'y', ms=40)
-plt.show()
 
 # swr = scipy.signal.hilbert(csc['data'])
 # print len(swr)
