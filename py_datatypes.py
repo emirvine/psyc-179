@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as sio
+import scipy
 
 
 def import_csc(matfile):
@@ -44,28 +45,6 @@ def import_spikes(matfile):
     return spikes
 
 
-csc = import_csc('inputs_csc.mat')
-pos = import_position('inputs_position.mat')
-events = import_events('inputs_event.mat')
-spikes = import_spikes('inputs_spike.mat')
-
-# Plotting lfp
-# plt.plot(csc['time'], csc['data'], 'k')
-# plt.xlim(3660, 3720)
-# plt.show()
-
-# Plotting position
-# plt.plot(pos['x'], pos['y'], 'g.', ms=2)
-# plt.axis('off')
-# plt.show()
-
-# Plotting event times
-# plt.plot(events['food'], np.zeros(len(events['food'])), '|', color='g', ms=200)
-# plt.plot(events['water'], np.zeros(len(events['water'])), '|', color='b', ms=200)
-# plt.ylim(-0.1, 0.2)
-# plt.show()
-
-
 def find_nearest_idx(array, val):
     return (np.abs(array-val)).argmin()
 
@@ -88,9 +67,56 @@ def time_slice(spikes, t_start, t_stop):
     sliced_spikes = spikes[indices]
     return sliced_spikes
 
-event = events['food'][0]
-t_start = event - 1
-t_stop = event + 1
+csc = import_csc('inputs_csc.mat')
+pos = import_position('inputs_position.mat')
+events = import_events('inputs_event.mat')
+spikes = import_spikes('inputs_spike.mat')
+
+
+# Plotting lfp
+# plt.plot(csc['time'], csc['data'], 'k')
+# plt.xlim(3660, 3720)
+# plt.show()
+
+notes = dict()
+notes['start_box'] = [237.1, 243.4]
+notes['choice_point'] = [589.9, 243.4]
+notes['top_pedestal'] = [348.6, 376.8]
+notes['bottom_pedestal'] = [348.6, 137.5]
+notes['top_reward'] = [448.8, 473.6]
+notes['bottom_reward'] = [448.8, 39.5]
+notes['top_turn1'] = [578.6, 417.4]
+notes['top_turn2'] = [498.2, 472.2]
+notes['bottom_turn1'] = [572.9, 95.7]
+notes['bottom_turn2'] = [485.4, 31.6]
+
+# Plotting position
+plt.plot(pos['x'], pos['y'], 'g.', ms=2)
+plt.plot(notes['start_box'][0], notes['start_box'][1], 'b.', ms=12)
+plt.plot(notes['choice_point'][0], notes['choice_point'][1], 'b.', ms=12)
+plt.plot(notes['top_pedestal'][0], notes['top_pedestal'][1], 'b.', ms=12)
+plt.plot(notes['bottom_pedestal'][0], notes['bottom_pedestal'][1], 'b.', ms=12)
+plt.plot(notes['top_reward'][0], notes['top_reward'][1], 'b.', ms=12)
+plt.plot(notes['bottom_reward'][0], notes['bottom_reward'][1], 'b.', ms=12)
+plt.plot(notes['top_turn1'][0], notes['top_turn1'][1], 'r.', ms=12)
+plt.plot(notes['top_turn2'][0], notes['top_turn2'][1], 'r.', ms=12)
+plt.plot(notes['bottom_turn1'][0], notes['bottom_turn1'][1], 'r.', ms=12)
+plt.plot(notes['bottom_turn2'][0], notes['bottom_turn2'][1], 'r.', ms=12)
+plt.axis('off')
+plt.show()
+
+
+
+# Plotting event times
+# plt.plot(events['food'], np.zeros(len(events['food'])), '|', color='g', ms=200)
+# plt.plot(events['water'], np.zeros(len(events['water'])), '|', color='b', ms=200)
+# plt.ylim(-0.1, 0.2)
+# plt.show()
+
+
+# event = events['food'][0]
+# t_start = event - 1
+# t_stop = event + 1
 
 # sliced_spikes = dict(time=[])
 # for neuron in range(len(spikes['time'])):
@@ -107,7 +133,6 @@ t_stop = event + 1
 # plt.title('Check it out!!! I can slice spikes!')
 # plt.show()
 
-
 # t_start_idx = find_nearest_idx(np.array(csc['time']), t_start)
 # t_end_idx = find_nearest_idx(np.array(csc['time']), t_stop)
 #
@@ -121,7 +146,58 @@ t_stop = event + 1
 
 
 
+# swr = scipy.signal.hilbert(csc['data'])
+# print len(swr)
+
 # Notes:
-# - function to restrict to interval
 # - function to make tuning curve from spikes/times
 # - tests? eg. time sliced spikes should have same neuron number as non-sliced
+
+#################################
+
+# Alyssa's Hilbert transform call in matlab
+# case 'HT'
+#         cfg.stepSize = [];
+#         cfg.weightby = [];
+#         cfg_temp = []; cfg_temp.verbose = cfg.verbose; cfg_temp.rippleband = [140 250]; cfg_temp.smooth = 1; cfg_temp.kernel = [];
+#         SWR = OldWizard(cfg_temp,CSC);
+#
+# function SWR = OldWizard(cfg_in,CSC)
+# %% Parse cfg parameters
+# cfg_def.rippleband = [140 250]; % in Hz
+# cfg_def.smooth = 1; % do you want to smooth the detector or not
+# cfg_def.kernel = []; % which kernel (if empty, goes to default)
+# cfg_def.verbose = 1; % talk to me or not
+#
+# mfun = mfilename;
+# cfg = ProcessConfig(cfg_def,cfg_in,mfun);
+#
+# if cfg.verbose
+#     tic
+#     disp([mfun,': looking for sharp wave-ripple events...'])
+# end
+#
+# % filter in the ripple band
+#
+# cfg_temp = [];
+# cfg_temp.type = 'fdesign';
+# cfg_temp.f = cfg.rippleband;
+# cfg_temp.verbose = 0;
+# CSCf = FilterLFP(cfg_temp,CSC);
+#
+# % ask hilbert what he thinks
+# score = abs(hilbert(CSCf.data)).^2;
+#
+# % apply smoothing, if desired
+#
+# if cfg.smooth
+#     if isempty(cfg.kernel)
+#         kernel = gausskernel(60,20);
+#     else
+#         kernel = cfg.kernel;
+#     end
+#    score = conv(score,kernel,'same');
+# end
+#
+# % make output
+# SWR = tsd(CSC.tvec,score);
