@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as sio
 import scipy
+from shapely.geometry import Point, LineString
 
 
 def import_csc(matfile):
@@ -67,10 +68,10 @@ def time_slice(spikes, t_start, t_stop):
     sliced_spikes = spikes[indices]
     return sliced_spikes
 
-# csc = import_csc('inputs_csc.mat')
-# pos = import_position('inputs_position.mat')
-# events = import_events('inputs_event.mat')
-# spikes = import_spikes('inputs_spike.mat')
+csc = import_csc('inputs_csc.mat')
+pos = import_position('inputs_position.mat')
+events = import_events('inputs_event.mat')
+spikes = import_spikes('inputs_spike.mat')
 
 
 # Plotting lfp
@@ -119,7 +120,68 @@ def time_slice(spikes, t_start, t_stop):
 # plt.plot(events['food'][0], np.zeros(1), '|', color='k', ms=300)
 # plt.show()
 
+path_pts = dict()
+path_pts['start_box'] = (237.1, 243.4)
+path_pts['choice_point'] = (596.5, 243.4)
 
+path_pts['food_turn1'] = (595.6, 372.4)
+path_pts['food_turn2'] = (585.7, 408.9)
+path_pts['food_turn3'] = (553.2, 444.0)
+path_pts['food_turn4'] = (498.2, 472.2)
+path_pts['food_reward'] = (448.8, 473.6)
+path_pts['food_pedestal'] = (348.6, 376.8)
+
+path_pts['water_turn1'] = (579.1, 105.5)
+path_pts['water_turn2'] = (568.7, 83.9)
+path_pts['water_turn3'] = (517.0, 45.3)
+path_pts['water_turn4'] = (492.5, 31.3)
+path_pts['water_reward'] = (452.1, 31.3)
+path_pts['water_pedestal'] = (348.6, 137.5)
+
+food_line = LineString([path_pts['start_box'], path_pts['choice_point'], path_pts['food_turn1'],
+                        path_pts['food_turn2'], path_pts['food_turn3'], path_pts['food_turn4'],
+                        path_pts['food_reward']])
+
+water_line = LineString([path_pts['start_box'], path_pts['choice_point'], path_pts['water_turn1'],
+                         path_pts['water_turn2'], path_pts['water_turn3'], path_pts['water_turn4'],
+                         path_pts['water_reward']])
+
+# start/stop times for trials from Alyssa's metadata
+water_starts = [3240.5, 3591.8, 3744.1, 3891.7, 4145.1, 4966.5, 5085.7, 5214.4, 5330.3]
+water_stops = [3282.1, 3605.4, 3754.9, 3905.5, 4170.3, 4982.1, 5106.4, 5232.3, 5357.6]
+
+food_starts = [3433.5, 4015.4, 4267.6, 4404.5, 4540.3, 4703.8, 4822.6, 5749.6, 5583.6]
+food_stops = [3448.2, 4044.4, 4284.5, 4420.4, 4583.4, 4718.8, 4870.3, 5491.3, 5622.4]
+
+plt.plot(pos['x'], pos['y'], 'k')
+for trial in range(len(food_starts)):
+    t_start_idx = find_nearest_idx(np.array(pos['time']), food_starts[trial])
+    t_end_idx = find_nearest_idx(np.array(pos['time']), food_stops[trial])
+
+    sliced_pos = dict()
+    sliced_pos['x'] = pos['x'][t_start_idx:t_end_idx]
+    sliced_pos['y'] = pos['y'][t_start_idx:t_end_idx]
+    sliced_pos['time'] = pos['time'][t_start_idx:t_end_idx]
+
+    plt.plot(sliced_pos['x'], sliced_pos['y'], 'g')
+
+plt.plot(food_line.xy[0], food_line.xy[1], 'c', ms=40)
+plt.show()
+
+plt.plot(pos['x'], pos['y'], 'k')
+for trial in range(len(water_starts)):
+    t_start_idx = find_nearest_idx(np.array(pos['time']), water_starts[trial])
+    t_end_idx = find_nearest_idx(np.array(pos['time']), water_stops[trial])
+
+    sliced_pos = dict()
+    sliced_pos['x'] = pos['x'][t_start_idx:t_end_idx]
+    sliced_pos['y'] = pos['y'][t_start_idx:t_end_idx]
+    sliced_pos['time'] = pos['time'][t_start_idx:t_end_idx]
+
+    plt.plot(sliced_pos['x'], sliced_pos['y'], 'b')
+
+plt.plot(water_line.xy[0], water_line.xy[1], 'y', ms=40)
+plt.show()
 
 # swr = scipy.signal.hilbert(csc['data'])
 # print len(swr)
