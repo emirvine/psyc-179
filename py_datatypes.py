@@ -169,12 +169,12 @@ food_starts = [3433.5, 4015.4, 4267.6, 4404.5, 4540.3, 4703.8, 4822.6, 5749.6, 5
 food_stops = [3448.2, 4044.4, 4284.5, 4420.4, 4583.4, 4718.8, 4870.3, 5491.3, 5622.4]
 
 # Linear paths for food and water trials.
-plt.plot(pos['x'], pos['y'], 'y')
-linear_food = linear_trajectory(pos, food_line, food_starts, food_stops)
-linear_water = linear_trajectory(pos, water_line, water_starts, water_stops)
-plt.plot(linear_food['x'], linear_food['y'], 'k', ms=40)
-plt.plot(linear_water['x'], linear_water['y'], 'g', ms=40)
-plt.show()
+# plt.plot(pos['x'], pos['y'], 'y')
+# linear_food = linear_trajectory(pos, food_line, food_starts, food_stops)
+# linear_water = linear_trajectory(pos, water_line, water_starts, water_stops)
+# plt.plot(linear_food['x'], linear_food['y'], 'k', ms=40)
+# plt.plot(linear_water['x'], linear_water['y'], 'g', ms=40)
+# plt.show()
 
 
 
