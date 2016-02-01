@@ -30,8 +30,15 @@ def import_position(matfile):
 def import_events(matfile):
     load_events = sio.loadmat(matfile)
     events = dict()
-    events['food'] = load_events['evt_food'][0]
-    events['water'] = load_events['evt_water'][0]
+    events['led1'] = load_events['evt_led1id'][0]
+    events['led2'] = load_events['evt_led2id'][0]
+    events['ledoff'] = load_events['evt_ledoff'][0]
+    events['pb1'] = load_events['evt_pb1id'][0]
+    events['pb2'] = load_events['evt_pb2id'][0]
+    events['pboff'] = load_events['evt_pboff'][0]
+    events['feeder1'] = load_events['evt_feeder1id'][0]
+    events['feeder2'] = load_events['evt_feeder2id'][0]
+    events['feederoff'] = load_events['evt_feederoff'][0]
     events['type'] = load_events['evt_type'][0]
     events['label'] = load_events['evt_label'][0][0][0]
     return events
@@ -88,16 +95,15 @@ def linear_trajectory(pos, ideal_path, trial_start, trial_stop):
             linear_pos['y'].append(linearized_point.xy[1])
     return linear_pos
 
-csc = import_csc('inputs_csc.mat')
-pos = import_position('inputs_position.mat')
-events = import_events('inputs_event.mat')
-spikes = import_spikes('inputs_spike.mat')
+csc = import_csc('emi_inputs_csc.mat')
+# pos = import_position('emi_inputs_position.mat')
+# events = import_events('emi_inputs_event.mat')
+# spikes = import_spikes('emi_inputs_spike.mat')
 
 
 # Plotting lfp
-# plt.plot(csc['time'], csc['data'], 'k')
-# plt.xlim(3660, 3720)
-# plt.show()
+plt.plot(csc['time'], csc['data'], 'k')
+plt.show()
 
 # Plotting event times
 # plt.plot(events['food'], np.zeros(len(events['food'])), '|', color='g', ms=200)
@@ -135,46 +141,63 @@ spikes = import_spikes('inputs_spike.mat')
 # plt.plot(events['food'][0], np.zeros(1), '|', color='k', ms=300)
 # plt.show()
 
-path_pts = dict()
-path_pts['start_box'] = (237.1, 243.4)
-path_pts['choice_point'] = (596.5, 243.4)
 
-path_pts['food_turn1'] = (595.6, 372.4)
-path_pts['food_turn2'] = (585.7, 408.9)
-path_pts['food_turn3'] = (553.2, 444.0)
-path_pts['food_turn4'] = (498.2, 472.2)
-path_pts['food_reward'] = (448.8, 473.6)
-path_pts['food_pedestal'] = (348.6, 376.8)
-
-path_pts['water_turn1'] = (579.1, 105.5)
-path_pts['water_turn2'] = (568.7, 83.9)
-path_pts['water_turn3'] = (517.0, 45.3)
-path_pts['water_turn4'] = (492.5, 31.3)
-path_pts['water_reward'] = (452.1, 31.3)
-path_pts['water_pedestal'] = (348.6, 137.5)
-
-food_line = LineString([path_pts['start_box'], path_pts['choice_point'], path_pts['food_turn1'],
-                        path_pts['food_turn2'], path_pts['food_turn3'], path_pts['food_turn4'],
-                        path_pts['food_reward']])
-
-water_line = LineString([path_pts['start_box'], path_pts['choice_point'], path_pts['water_turn1'],
-                         path_pts['water_turn2'], path_pts['water_turn3'], path_pts['water_turn4'],
-                         path_pts['water_reward']])
-
-# start/stop times for trials from Alyssa's metadata
-water_starts = [3240.5, 3591.8, 3744.1, 3891.7, 4145.1, 4966.5, 5085.7, 5214.4, 5330.3]
-water_stops = [3282.1, 3605.4, 3754.9, 3905.5, 4170.3, 4982.1, 5106.4, 5232.3, 5357.6]
-
-food_starts = [3433.5, 4015.4, 4267.6, 4404.5, 4540.3, 4703.8, 4822.6, 5749.6, 5583.6]
-food_stops = [3448.2, 4044.4, 4284.5, 4420.4, 4583.4, 4718.8, 4870.3, 5491.3, 5622.4]
+# T-maze ideal points
+# path_pts = dict()
+# path_pts['start_box'] = (237.1, 243.4)
+# path_pts['choice_point'] = (596.5, 243.4)
+#
+# path_pts['food_turn1'] = (595.6, 372.4)
+# path_pts['food_turn2'] = (585.7, 408.9)
+# path_pts['food_turn3'] = (553.2, 444.0)
+# path_pts['food_turn4'] = (498.2, 472.2)
+# path_pts['food_reward'] = (448.8, 473.6)
+# path_pts['food_pedestal'] = (348.6, 376.8)
+#
+# path_pts['water_turn1'] = (579.1, 105.5)
+# path_pts['water_turn2'] = (568.7, 83.9)
+# path_pts['water_turn3'] = (517.0, 45.3)
+# path_pts['water_turn4'] = (492.5, 31.3)
+# path_pts['water_reward'] = (452.1, 31.3)
+# path_pts['water_pedestal'] = (348.6, 137.5)
+#
+# food_line = LineString([path_pts['start_box'], path_pts['choice_point'], path_pts['food_turn1'],
+#                         path_pts['food_turn2'], path_pts['food_turn3'], path_pts['food_turn4'],
+#                         path_pts['food_reward']])
+#
+# water_line = LineString([path_pts['start_box'], path_pts['choice_point'], path_pts['water_turn1'],
+#                          path_pts['water_turn2'], path_pts['water_turn3'], path_pts['water_turn4'],
+#                          path_pts['water_reward']])
+#
+# # start/stop times for trials from Alyssa's metadata
+# water_starts = [3240.5, 3591.8, 3744.1, 3891.7, 4145.1, 4966.5, 5085.7, 5214.4, 5330.3]
+# water_stops = [3282.1, 3605.4, 3754.9, 3905.5, 4170.3, 4982.1, 5106.4, 5232.3, 5357.6]
+#
+# food_starts = [3433.5, 4015.4, 4267.6, 4404.5, 4540.3, 4703.8, 4822.6, 5749.6, 5583.6]
+# food_stops = [3448.2, 4044.4, 4284.5, 4420.4, 4583.4, 4718.8, 4870.3, 5491.3, 5622.4]
 
 # Linear paths for food and water trials.
 # plt.plot(pos['x'], pos['y'], 'y')
 # linear_food = linear_trajectory(pos, food_line, food_starts, food_stops)
-# linear_water = linear_trajectory(pos, water_line, water_starts, water_stops)
+# linear_water = linear_trajectory(pos, water_line, water_starts[0], water_stops[0])
 # plt.plot(linear_food['x'], linear_food['y'], 'k', ms=40)
 # plt.plot(linear_water['x'], linear_water['y'], 'g', ms=40)
 # plt.show()
+
+# print linear_water
+#
+# bin_size = 100
+# dimension = len(linear_water)
+#
+# for edge in range(dimension):
+#     bin_start = min(linear_water[edge, :])
+#     bin_stop = max(linear_water[edge, :])
+#     bin_edges.append(np.linspace(bin_start, bin_stop, num=bin_size))
+#
+# dt = 1/30.
+# min_occupancy = 1
+#
+# pos_idx = np.searchsorted(linear_water, bin_edges)
 
 
 
