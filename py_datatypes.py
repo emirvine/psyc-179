@@ -175,6 +175,66 @@ t_stop = t_start + 50
 
 
 
+path_pts = dict()
+path_pts['feeder1'] = (468, 471)
+path_pts['point1'] = (466, 397)
+path_pts['turn1'] = (465, 380)
+path_pts['point2'] = (445, 380)
+path_pts['point3'] = (298, 398)
+path_pts['point4'] = (173, 367)
+path_pts['turn2'] = (148, 359)
+path_pts['point5'] = (138, 319)
+path_pts['point6'] = (140, 103)
+path_pts['turn3'] = (155, 69)
+path_pts['point7'] = (203, 58)
+path_pts['feeder2'] = (661, 54)
+path_pts['shortcut1'] = (467, 378)
+path_pts['point8'] = (466, 195)
+path_pts['point9'] = (496, 166)
+path_pts['point10'] = (645, 164)
+path_pts['point11'] = (669, 162)
+path_pts['point12'] = (672, 146)
+path_pts['shortcut2'] = (661, 55)
+path_pts['novel1'] = (146, 359)
+path_pts['novel2'] = (49, 351)
+
+u_line = LineString([path_pts['feeder1'], path_pts['point1'], path_pts['turn1'], path_pts['point2'],
+                        path_pts['point3'], path_pts['point4'], path_pts['turn2'], path_pts['point5'],
+                        path_pts['point6'], path_pts['turn3'], path_pts['point7'], path_pts['feeder2']])
+
+shortcut_line = LineString([path_pts['shortcut1'], path_pts['point8'], path_pts['point9'], path_pts['point10'],
+                            path_pts['point11'], path_pts['point12'], path_pts['shortcut2']])
+
+novel_line = LineString([path_pts['novel1'], path_pts['novel2']])
+
+plt.plot(pos['x'], pos['y'], 'b.', ms=1)
+
+# plt.plot(path_pts['feeder1'][0], path_pts['feeder1'][1], 'ro', ms=10)
+# plt.plot(path_pts['point1'][0], path_pts['point1'][1], 'ko', ms=10)
+# plt.plot(path_pts['turn1'][0], path_pts['turn1'][1], 'go', ms=10)
+# plt.plot(path_pts['point2'][0], path_pts['point2'][1], 'yo', ms=10)
+# plt.plot(path_pts['point3'][0], path_pts['point3'][1], 'co', ms=10)
+# plt.plot(path_pts['point4'][0], path_pts['point4'][1], 'mo', ms=10)
+# plt.plot(path_pts['turn2'][0], path_pts['turn2'][1], 'ro', ms=10)
+# plt.plot(path_pts['point5'][0], path_pts['point5'][1], 'ro', ms=10)
+# plt.plot(path_pts['point6'][0], path_pts['point6'][1], 'ro', ms=10)
+# plt.plot(path_pts['turn3'][0], path_pts['turn3'][1], 'ro', ms=10)
+# plt.plot(path_pts['point7'][0], path_pts['point7'][1], 'ro', ms=10)
+# plt.plot(path_pts['feeder2'][0], path_pts['feeder2'][1], 'ro', ms=10)
+
+# plt.plot(path_pts['shortcut1'][0], path_pts['shortcut1'][1], 'ro', ms=10)
+# plt.plot(path_pts['point8'][0], path_pts['point8'][1], 'ro', ms=10)
+# plt.plot(path_pts['point9'][0], path_pts['point9'][1], 'ro', ms=10)
+# plt.plot(path_pts['point10'][0], path_pts['point10'][1], 'ro', ms=10)
+# plt.plot(path_pts['point11'][0], path_pts['point11'][1], 'ro', ms=10)
+# plt.plot(path_pts['point12'][0], path_pts['point12'][1], 'ro', ms=10)
+# plt.plot(path_pts['shortcut2'][0], path_pts['shortcut2'][1], 'ro', ms=10)
+
+# plt.plot(path_pts['novel1'][0], path_pts['novel1'][1], 'ro', ms=10)
+# plt.plot(path_pts['novel2'][0], path_pts['novel2'][1], 'ro', ms=10)
+# plt.show()
+
+
 # T-maze ideal points
 # path_pts = dict()
 # path_pts['start_box'] = (237.1, 243.4)
