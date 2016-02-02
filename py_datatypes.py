@@ -27,6 +27,15 @@ def import_position(matfile):
     return pos
 
 
+def import_videotrack(matfile):
+    load_vt = sio.loadmat(matfile)
+    vt = dict()
+    vt['time'] = load_vt['pos_tsd'][0][0][0][0]
+    vt['x'] = load_vt['pos_tsd'][0][0][1][0]
+    vt['y'] = load_vt['pos_tsd'][0][0][1][1]
+    return vt
+
+
 def import_events(matfile):
     load_events = sio.loadmat(matfile)
     events = dict()
@@ -95,26 +104,48 @@ def linear_trajectory(pos, ideal_path, trial_start, trial_stop):
             linear_pos['y'].append(linearized_point.xy[1])
     return linear_pos
 
-csc = import_csc('emi_inputs_csc.mat')
-# pos = import_position('emi_inputs_position.mat')
+# csc = import_csc('emi_inputs_csc.mat')
+pos = import_videotrack('emi_inputs_vt.mat')
 # events = import_events('emi_inputs_event.mat')
 # spikes = import_spikes('emi_inputs_spike.mat')
 
 
 # Plotting lfp
-plt.plot(csc['time'], csc['data'], 'k')
-plt.show()
-
-# Plotting event times
-# plt.plot(events['food'], np.zeros(len(events['food'])), '|', color='g', ms=200)
-# plt.plot(events['water'], np.zeros(len(events['water'])), '|', color='b', ms=200)
-# plt.ylim(-0.1, 0.2)
+# plt.plot(csc['time'], csc['data'], 'k')
+# plt.xlim(1075.8, 1077.8)
 # plt.show()
 
-# event = events['food'][0]
-# t_start = event - 1
-# t_stop = event + 1
+# Plotting position xy and xtime
+# plt.plot(pos['x'], pos['y'], 'b.', ms=1)
+# plt.show()
+# plt.plot(pos['time'], pos['x'], 'g.', ms=1)
+# plt.show()
 
+# Plotting event times
+# plt.plot(events['feeder1'], np.zeros(len(events['feeder1'])), '|', color='g', ms=200)
+# plt.plot(events['feeder2'], np.zeros(len(events['feeder2'])), '|', color='r', ms=200)
+# plt.ylim(-0.1, 0.1)
+# plt.show()
+
+# Plotting spike times
+# for neuron in range(len(spikes['time'])):
+#     plt.plot(spikes['time'][neuron], np.ones(len(spikes['time'][neuron]))+neuron+1, '|', color='k')
+# plt.xlim(1075.8, 1077.8)
+# plt.show()
+
+task_times = dict()
+task_times['prerecord'] = [721.9412, 1027.1]
+task_times['phase1'] = [1075.8, 1569.6]
+task_times['pauseA'] = [1593.9, 2219.0]
+task_times['phase2'] = [2243.4, 3512.4]
+task_times['pauseB'] = [3556.1, 5441.3]
+task_times['phase3'] = [5469.7, 8794.6]
+task_times['postrecord'] = [8812.7, 9143.4]
+
+t_start = task_times['phase1'][0]
+t_stop = t_start + 50
+
+# Slicing spikes
 # sliced_spikes = dict(time=[])
 # for neuron in range(len(spikes['time'])):
 #     sliced_spikes['time'].append(time_slice(spikes['time'][neuron], t_start, t_stop))
@@ -122,14 +153,15 @@ plt.show()
 # print str(len(spikes['time'])) + ' should equal ' + str(len(sliced_spikes['time']))
 #
 # for neuron in range(len(spikes['time'])):
-#     plt.plot(sliced_spikes['time'][neuron], np.ones(len(sliced_spikes['time'][neuron]))+neuron+1,
-#              '|', color='k')
-# plt.plot(events['food'][0], np.zeros(np.array(events['food'][0]).size)+(len(sliced_spikes['time'])/2.), '|', color='r', ms=300)
+#     plt.plot(sliced_spikes['time'][neuron], np.ones(len(sliced_spikes['time'][neuron]))+neuron+1, '|', color='k')
+#
+# plt.xlim(t_start-10, t_stop+10)
 # plt.ylabel('Neuron number')
 # plt.xlabel('Time (ms?)')
 # plt.title('Check it out!!! I can slice spikes!')
 # plt.show()
 
+# Slicing LFP
 # t_start_idx = find_nearest_idx(np.array(csc['time']), t_start)
 # t_end_idx = find_nearest_idx(np.array(csc['time']), t_stop)
 #
@@ -138,8 +170,9 @@ plt.show()
 # sliced_csc['time'] = csc['time'][t_start_idx:t_end_idx]
 #
 # plt.plot(sliced_csc['time'], sliced_csc['data'], 'y')
-# plt.plot(events['food'][0], np.zeros(1), '|', color='k', ms=300)
 # plt.show()
+
+
 
 
 # T-maze ideal points
