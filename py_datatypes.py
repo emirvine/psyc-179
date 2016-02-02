@@ -33,6 +33,11 @@ def import_videotrack(matfile):
     vt['time'] = load_vt['pos_tsd'][0][0][0][0]
     vt['x'] = load_vt['pos_tsd'][0][0][1][0]
     vt['y'] = load_vt['pos_tsd'][0][0][1][1]
+
+    nan_idx = np.isnan(vt['x']) | np.isnan(vt['y'])
+    vt['time'] = vt['time'][~nan_idx]
+    vt['x'] = vt['x'][~nan_idx]
+    vt['y'] = vt['y'][~nan_idx]
     return vt
 
 
@@ -86,28 +91,27 @@ def time_slice(spikes, t_start, t_stop):
 
 
 def linear_trajectory(pos, ideal_path, trial_start, trial_stop):
-    for trial in range(len(trial_start)):
-        t_start_idx = find_nearest_idx(np.array(pos['time']), trial_start[trial])
-        t_end_idx = find_nearest_idx(np.array(pos['time']), trial_stop[trial])
+    t_start_idx = find_nearest_idx(np.array(pos['time']), trial_start)
+    t_end_idx = find_nearest_idx(np.array(pos['time']), trial_stop)
 
-        pos_trial = dict()
-        pos_trial['x'] = pos['x'][t_start_idx:t_end_idx]
-        pos_trial['y'] = pos['y'][t_start_idx:t_end_idx]
-        pos_trial['time'] = pos['time'][t_start_idx:t_end_idx]
+    pos_trial = dict()
+    pos_trial['x'] = pos['x'][t_start_idx:t_end_idx]
+    pos_trial['y'] = pos['y'][t_start_idx:t_end_idx]
+    pos_trial['time'] = pos['time'][t_start_idx:t_end_idx]
 
-        linear_pos = dict(x=[], y=[])
-        linear_pos['time'] = pos_trial['time']
-        for point in range(len(pos_trial['x'])-1):
-            position = Point(pos_trial['x'][point], pos_trial['y'][point])
-            linearized_point = ideal_path.interpolate(ideal_path.project(position))
-            linear_pos['x'].append(linearized_point.xy[0])
-            linear_pos['y'].append(linearized_point.xy[1])
+    linear_pos = dict(x=[], y=[])
+    linear_pos['time'] = pos_trial['time']
+    for point in range(len(pos_trial['x'])-1):
+        position = Point(pos_trial['x'][point], pos_trial['y'][point])
+        linearized_point = ideal_path.interpolate(ideal_path.project(position))
+        linear_pos['x'].append(linearized_point.xy[0])
+        linear_pos['y'].append(linearized_point.xy[1])
     return linear_pos
 
 # csc = import_csc('emi_inputs_csc.mat')
-pos = import_videotrack('emi_inputs_vt.mat')
+# pos = import_videotrack('emi_inputs_vt.mat')
 # events = import_events('emi_inputs_event.mat')
-# spikes = import_spikes('emi_inputs_spike.mat')
+spikes = import_spikes('emi_inputs_spike.mat')
 
 
 # Plotting lfp
@@ -172,6 +176,18 @@ t_stop = t_start + 50
 # plt.plot(sliced_csc['time'], sliced_csc['data'], 'y')
 # plt.show()
 
+# Slicing position
+# t_start_idx = find_nearest_idx(np.array(pos['time']), t_start)
+# t_end_idx = find_nearest_idx(np.array(pos['time']), t_stop)
+#
+# sliced_pos = dict()
+# sliced_pos['x'] = pos['x'][t_start_idx:t_end_idx]
+# sliced_pos['y'] = pos['y'][t_start_idx:t_end_idx]
+# sliced_pos['time'] = pos['time'][t_start_idx:t_end_idx]
+#
+# plt.plot(sliced_pos['x'], sliced_pos['y'], 'y.')
+# plt.show()
+
 
 
 
@@ -198,29 +214,38 @@ path_pts['shortcut2'] = (661, 55)
 path_pts['novel1'] = (146, 359)
 path_pts['novel2'] = (49, 351)
 
-u_line = LineString([path_pts['feeder1'], path_pts['point1'], path_pts['turn1'], path_pts['point2'],
-                        path_pts['point3'], path_pts['point4'], path_pts['turn2'], path_pts['point5'],
-                        path_pts['point6'], path_pts['turn3'], path_pts['point7'], path_pts['feeder2']])
+# u_line = LineString([path_pts['feeder1'], path_pts['point1'], path_pts['turn1'], path_pts['point2'],
+#                         path_pts['point3'], path_pts['point4'], path_pts['turn2'], path_pts['point5'],
+#                         path_pts['point6'], path_pts['turn3'], path_pts['point7'], path_pts['feeder2']])
+#
+# shortcut_line = LineString([path_pts['shortcut1'], path_pts['point8'], path_pts['point9'], path_pts['point10'],
+#                             path_pts['point11'], path_pts['point12'], path_pts['shortcut2']])
+#
+# novel_line = LineString([path_pts['novel1'], path_pts['novel2']])
+#
+start_time = task_times['phase2'][0]
+stop_time = task_times['phase2'][1]
+#
+# plt.plot(pos['x'], pos['y'], 'y.')
+# plt.plot(u_line.xy[0], u_line.xy[1], 'k.')
+#
+# linear_u = linear_trajectory(pos, u_line, start_time, stop_time)
+# plt.plot(linear_u['x'], linear_u['y'], 'r.')
+# plt.show()
 
-shortcut_line = LineString([path_pts['shortcut1'], path_pts['point8'], path_pts['point9'], path_pts['point10'],
-                            path_pts['point11'], path_pts['point12'], path_pts['shortcut2']])
-
-novel_line = LineString([path_pts['novel1'], path_pts['novel2']])
-
-plt.plot(pos['x'], pos['y'], 'b.', ms=1)
-
+# plt.plot(pos['x'], pos['y'], 'b.', ms=1)
 # plt.plot(path_pts['feeder1'][0], path_pts['feeder1'][1], 'ro', ms=10)
-# plt.plot(path_pts['point1'][0], path_pts['point1'][1], 'ko', ms=10)
-# plt.plot(path_pts['turn1'][0], path_pts['turn1'][1], 'go', ms=10)
-# plt.plot(path_pts['point2'][0], path_pts['point2'][1], 'yo', ms=10)
-# plt.plot(path_pts['point3'][0], path_pts['point3'][1], 'co', ms=10)
-# plt.plot(path_pts['point4'][0], path_pts['point4'][1], 'mo', ms=10)
+# plt.plot(path_pts['point1'][0], path_pts['point1'][1], 'go', ms=10)
+# plt.plot(path_pts['turn1'][0], path_pts['turn1'][1], 'ro', ms=10)
+# plt.plot(path_pts['point2'][0], path_pts['point2'][1], 'go', ms=10)
+# plt.plot(path_pts['point3'][0], path_pts['point3'][1], 'ro', ms=10)
+# plt.plot(path_pts['point4'][0], path_pts['point4'][1], 'go', ms=10)
 # plt.plot(path_pts['turn2'][0], path_pts['turn2'][1], 'ro', ms=10)
-# plt.plot(path_pts['point5'][0], path_pts['point5'][1], 'ro', ms=10)
+# plt.plot(path_pts['point5'][0], path_pts['point5'][1], 'go', ms=10)
 # plt.plot(path_pts['point6'][0], path_pts['point6'][1], 'ro', ms=10)
-# plt.plot(path_pts['turn3'][0], path_pts['turn3'][1], 'ro', ms=10)
+# plt.plot(path_pts['turn3'][0], path_pts['turn3'][1], 'go', ms=10)
 # plt.plot(path_pts['point7'][0], path_pts['point7'][1], 'ro', ms=10)
-# plt.plot(path_pts['feeder2'][0], path_pts['feeder2'][1], 'ro', ms=10)
+# plt.plot(path_pts['feeder2'][0], path_pts['feeder2'][1], 'go', ms=10)
 
 # plt.plot(path_pts['shortcut1'][0], path_pts['shortcut1'][1], 'ro', ms=10)
 # plt.plot(path_pts['point8'][0], path_pts['point8'][1], 'ro', ms=10)
@@ -233,6 +258,33 @@ plt.plot(pos['x'], pos['y'], 'b.', ms=1)
 # plt.plot(path_pts['novel1'][0], path_pts['novel1'][1], 'ro', ms=10)
 # plt.plot(path_pts['novel2'][0], path_pts['novel2'][1], 'ro', ms=10)
 # plt.show()
+
+
+phase2_spikes = dict(time=[])
+for neuron in range(len(spikes['time'])):
+        phase2_spikes['time'].append(time_slice(spikes['time'][neuron], start_time, stop_time))
+assert len(phase2_spikes['time']) == len(spikes['time'])
+
+firing_rate = dict(time=[])
+bin_size = 100
+
+for neuron in range(len(phase2_spikes['time'])):
+    bin_start = start_time
+    num_spikes = []
+    while bin_start < stop_time:
+        bin_end = bin_start + bin_size
+        bin_stop = min(bin_end, stop_time)
+        binned_neurons = time_slice(phase2_spikes['time'][neuron], bin_start, bin_stop)
+        bin_start = bin_stop + 0.0001
+        num_spikes.append(len(binned_neurons))
+    firing_rate['time'].append(num_spikes)
+
+for rates in firing_rate['time']:
+    plt.plot(rates, 'k')
+plt.show()
+
+
+
 
 
 # T-maze ideal points
