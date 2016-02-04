@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import scipy.io as sio
 import scipy
 from shapely.geometry import Point, LineString
+from scipy.interpolate import interp1d
 
 
 def import_csc(matfile):
@@ -99,17 +100,24 @@ def linear_trajectory(pos, ideal_path, trial_start, trial_stop):
     pos_trial['y'] = pos['y'][t_start_idx:t_end_idx]
     pos_trial['time'] = pos['time'][t_start_idx:t_end_idx]
 
-    linear_pos = dict(x=[], y=[])
-    linear_pos['time'] = pos_trial['time']
-    for point in range(len(pos_trial['x'])-1):
+    # linear_pos = dict(x=[], y=[])
+
+    z = dict(position=[])
+    z['time'] = pos_trial['time']
+    for point in range(len(pos_trial['x'])):
         position = Point(pos_trial['x'][point], pos_trial['y'][point])
-        linearized_point = ideal_path.interpolate(ideal_path.project(position))
-        linear_pos['x'].append(linearized_point.xy[0])
-        linear_pos['y'].append(linearized_point.xy[1])
-    return linear_pos
+        # linearized_point = ideal_path.interpolate(ideal_path.project(position))
+        # linear_pos['x'].append(linearized_point.xy[0])
+        # linear_pos['y'].append(linearized_point.xy[1])
+        z['position'].append(ideal_path.project(position))
+    return z
+
+def raster_plot(spikes, colour='k'):
+    for neuron in range(len(spikes)):
+        plt.plot(spikes[neuron], np.ones(len(spikes[neuron]))+neuron+1, '|', color=colour)
 
 # csc = import_csc('emi_inputs_csc.mat')
-# pos = import_videotrack('emi_inputs_vt.mat')
+pos = import_videotrack('emi_inputs_vt.mat')
 # events = import_events('emi_inputs_event.mat')
 spikes = import_spikes('emi_inputs_spike.mat')
 
@@ -214,23 +222,23 @@ path_pts['shortcut2'] = (661, 55)
 path_pts['novel1'] = (146, 359)
 path_pts['novel2'] = (49, 351)
 
-# u_line = LineString([path_pts['feeder1'], path_pts['point1'], path_pts['turn1'], path_pts['point2'],
-#                         path_pts['point3'], path_pts['point4'], path_pts['turn2'], path_pts['point5'],
-#                         path_pts['point6'], path_pts['turn3'], path_pts['point7'], path_pts['feeder2']])
+u_line = LineString([path_pts['feeder1'], path_pts['point1'], path_pts['turn1'], path_pts['point2'],
+                        path_pts['point3'], path_pts['point4'], path_pts['turn2'], path_pts['point5'],
+                        path_pts['point6'], path_pts['turn3'], path_pts['point7'], path_pts['feeder2']])
+
+shortcut_line = LineString([path_pts['shortcut1'], path_pts['point8'], path_pts['point9'], path_pts['point10'],
+                            path_pts['point11'], path_pts['point12'], path_pts['shortcut2']])
+
+novel_line = LineString([path_pts['novel1'], path_pts['novel2']])
 #
-# shortcut_line = LineString([path_pts['shortcut1'], path_pts['point8'], path_pts['point9'], path_pts['point10'],
-#                             path_pts['point11'], path_pts['point12'], path_pts['shortcut2']])
-#
-# novel_line = LineString([path_pts['novel1'], path_pts['novel2']])
-#
-start_time = task_times['phase2'][0]
-stop_time = task_times['phase2'][1]
+start_time = task_times['phase1'][0]
+stop_time = task_times['phase1'][1]
 #
 # plt.plot(pos['x'], pos['y'], 'y.')
 # plt.plot(u_line.xy[0], u_line.xy[1], 'k.')
 #
-# linear_u = linear_trajectory(pos, u_line, start_time, stop_time)
-# plt.plot(linear_u['x'], linear_u['y'], 'r.')
+linear_u = linear_trajectory(pos, u_line, start_time, stop_time)
+# plt.plot(linear_u, 'b.')
 # plt.show()
 
 # plt.plot(pos['x'], pos['y'], 'b.', ms=1)
@@ -264,141 +272,58 @@ phase2_spikes = dict(time=[])
 for neuron in range(len(spikes['time'])):
         phase2_spikes['time'].append(time_slice(spikes['time'][neuron], start_time, stop_time))
 assert len(phase2_spikes['time']) == len(spikes['time'])
-
-firing_rate = dict(time=[])
-bin_size = 100
-
-for neuron in range(len(phase2_spikes['time'])):
-    bin_start = start_time
-    num_spikes = []
-    while bin_start < stop_time:
-        bin_end = bin_start + bin_size
-        bin_stop = min(bin_end, stop_time)
-        binned_neurons = time_slice(phase2_spikes['time'][neuron], bin_start, bin_stop)
-        bin_start = bin_stop + 0.0001
-        num_spikes.append(len(binned_neurons))
-    firing_rate['time'].append(num_spikes)
-
-for rates in firing_rate['time']:
-    plt.plot(rates, 'k')
-plt.show()
-
-
-
-
-
-# T-maze ideal points
-# path_pts = dict()
-# path_pts['start_box'] = (237.1, 243.4)
-# path_pts['choice_point'] = (596.5, 243.4)
+# raster_plot(phase2_spikes['time'], colour='m')
+# plt.show()
 #
-# path_pts['food_turn1'] = (595.6, 372.4)
-# path_pts['food_turn2'] = (585.7, 408.9)
-# path_pts['food_turn3'] = (553.2, 444.0)
-# path_pts['food_turn4'] = (498.2, 472.2)
-# path_pts['food_reward'] = (448.8, 473.6)
-# path_pts['food_pedestal'] = (348.6, 376.8)
+# firing_rate = dict(time=[])
+# bin_size = 50
 #
-# path_pts['water_turn1'] = (579.1, 105.5)
-# path_pts['water_turn2'] = (568.7, 83.9)
-# path_pts['water_turn3'] = (517.0, 45.3)
-# path_pts['water_turn4'] = (492.5, 31.3)
-# path_pts['water_reward'] = (452.1, 31.3)
-# path_pts['water_pedestal'] = (348.6, 137.5)
+# for neuron in range(len(phase2_spikes['time'])):
+#     bin_start = start_time
+#     num_spikes = []
+#     while bin_start < stop_time:
+#         bin_end = bin_start + bin_size
+#         bin_stop = min(bin_end, stop_time)
+#         binned_neurons = time_slice(phase2_spikes['time'][neuron], bin_start, bin_stop)
+#         bin_start = bin_stop + 0.0001
+#         num_spikes.append(len(binned_neurons))
+#     firing_rate['time'].append(num_spikes)
 #
-# food_line = LineString([path_pts['start_box'], path_pts['choice_point'], path_pts['food_turn1'],
-#                         path_pts['food_turn2'], path_pts['food_turn3'], path_pts['food_turn4'],
-#                         path_pts['food_reward']])
-#
-# water_line = LineString([path_pts['start_box'], path_pts['choice_point'], path_pts['water_turn1'],
-#                          path_pts['water_turn2'], path_pts['water_turn3'], path_pts['water_turn4'],
-#                          path_pts['water_reward']])
-#
-# # start/stop times for trials from Alyssa's metadata
-# water_starts = [3240.5, 3591.8, 3744.1, 3891.7, 4145.1, 4966.5, 5085.7, 5214.4, 5330.3]
-# water_stops = [3282.1, 3605.4, 3754.9, 3905.5, 4170.3, 4982.1, 5106.4, 5232.3, 5357.6]
-#
-# food_starts = [3433.5, 4015.4, 4267.6, 4404.5, 4540.3, 4703.8, 4822.6, 5749.6, 5583.6]
-# food_stops = [3448.2, 4044.4, 4284.5, 4420.4, 4583.4, 4718.8, 4870.3, 5491.3, 5622.4]
-
-# Linear paths for food and water trials.
-# plt.plot(pos['x'], pos['y'], 'y')
-# linear_food = linear_trajectory(pos, food_line, food_starts, food_stops)
-# linear_water = linear_trajectory(pos, water_line, water_starts[0], water_stops[0])
-# plt.plot(linear_food['x'], linear_food['y'], 'k', ms=40)
-# plt.plot(linear_water['x'], linear_water['y'], 'g', ms=40)
+# for rates in firing_rate['time']:
+#     plt.plot(rates, 'k')
 # plt.show()
 
-# print linear_water
-#
-# bin_size = 100
-# dimension = len(linear_water)
-#
-# for edge in range(dimension):
-#     bin_start = min(linear_water[edge, :])
-#     bin_stop = max(linear_water[edge, :])
-#     bin_edges.append(np.linspace(bin_start, bin_stop, num=bin_size))
-#
-# dt = 1/30.
-# min_occupancy = 1
-#
-# pos_idx = np.searchsorted(linear_water, bin_edges)
+num_bins = 10
+# line_stop = int(u_line.length)
+# pos_bin_size = int(u_line.length / num_bins)
+# pos_bin_starts = range(0, line_stop, pos_bin_size)
+# binned_position = []
+# for bin in range(line_stop / pos_bin_size):
+#     pos_num_spikes = []
+#     for neuron in range(len(linear_u)):
+#         pos_bin_start = pos_bin_starts[bin]
+#         pos_bin_end = pos_bin_start + pos_bin_size
+#         pos_bin_stop = min(pos_bin_end, line_stop)
+#         binned_position.append([pos_bin_start, pos_bin_stop])
+
+min_occ = 1
+sampling_rate = 1/30.
+linear_start = np.min(linear_u['position'])
+linear_stop = np.max(linear_u['position'])
+binned_spikes = np.zeros(num_bins)
+bin_edges = np.linspace(linear_start, linear_stop, num=num_bins+1)
+bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2.
+# print bin_centers
+
+spike_z = np.zeros(len(bin_centers))
+for spike_time in spikes['time'][3]:
+    assigned_bin = find_nearest_idx(linear_u['time'], spike_time)
+    which_bin = find_nearest_idx(bin_centers, linear_u['position'][assigned_bin])
+    spike_z[which_bin] += 1
+
+print spike_z
 
 
-
-
-# swr = scipy.signal.hilbert(csc['data'])
-# print len(swr)
-
-# Notes:
-# - function to make tuning curve from spikes/times
-# - tests? eg. time sliced spikes should have same neuron number as non-sliced
-
-#################################
-
-# Alyssa's Hilbert transform call in matlab
-# case 'HT'
-#         cfg.stepSize = [];
-#         cfg.weightby = [];
-#         cfg_temp = []; cfg_temp.verbose = cfg.verbose; cfg_temp.rippleband = [140 250]; cfg_temp.smooth = 1; cfg_temp.kernel = [];
-#         SWR = OldWizard(cfg_temp,CSC);
-#
-# function SWR = OldWizard(cfg_in,CSC)
-# %% Parse cfg parameters
-# cfg_def.rippleband = [140 250]; % in Hz
-# cfg_def.smooth = 1; % do you want to smooth the detector or not
-# cfg_def.kernel = []; % which kernel (if empty, goes to default)
-# cfg_def.verbose = 1; % talk to me or not
-#
-# mfun = mfilename;
-# cfg = ProcessConfig(cfg_def,cfg_in,mfun);
-#
-# if cfg.verbose
-#     tic
-#     disp([mfun,': looking for sharp wave-ripple events...'])
-# end
-#
-# % filter in the ripple band
-#
-# cfg_temp = [];
-# cfg_temp.type = 'fdesign';
-# cfg_temp.f = cfg.rippleband;
-# cfg_temp.verbose = 0;
-# CSCf = FilterLFP(cfg_temp,CSC);
-#
-# % ask hilbert what he thinks
-# score = abs(hilbert(CSCf.data)).^2;
-#
-# % apply smoothing, if desired
-#
-# if cfg.smooth
-#     if isempty(cfg.kernel)
-#         kernel = gausskernel(60,20);
-#     else
-#         kernel = cfg.kernel;
-#     end
-#    score = conv(score,kernel,'same');
-# end
-#
-# % make output
-# SWR = tsd(CSC.tvec,score);
+# counts = np.nonzero(bin_centers)
+# print counts
+# spike_z = np.zeros(len(counts))
