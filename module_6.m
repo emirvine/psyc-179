@@ -142,7 +142,7 @@ cfg_thres = [];
 cfg_thres.operation = '>=';
 cfg_thres.threshold = 3;
 
-[swr_evt, ~] = SelectIV(cfg_thres, swr_evt, 'data');
+[swr_evt, ~] = emi_selectIV(cfg_thres, swr_evt, 'data');
 
 % Plot swr events over all lfp
 % PlotTSDfromIV([], swr_evt, csc);
