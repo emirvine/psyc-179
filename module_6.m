@@ -140,9 +140,9 @@ swr_evt = AddTSDtoIV(cfg_maxp, swr_evt, swr_zpower);
 % Select events with >5 z-scored power
 cfg_thres = [];
 cfg_thres.operation = '>=';
-cfg_thres.threshold = 3;
+cfg_thres.threshold = 5;
 
-[swr_evt, ~] = emi_selectIV(cfg_thres, swr_evt, 'data');
+[swr_evt, ~] = SelectIV(cfg_thres, swr_evt, 'maxSWRpower');
 
 % Plot swr events over all lfp
 % PlotTSDfromIV([], swr_evt, csc);
@@ -156,7 +156,7 @@ cfg_thres.threshold = 3;
 % 
 % PlotTSDfromIV(cfg_center, swr_evt, csc);
 
-% Plot with highlighted edges?
+% Plot with highlighted swrs?
 cfg_edge = [];
 cfg_edge.display = 'iv';
 cfg_edge.fgcol = 'r';
