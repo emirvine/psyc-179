@@ -8,6 +8,7 @@ from scipy import signal
 import scipy.ndimage as ndimage
 
 
+
 def import_csc(matfile):
     load_csc = sio.loadmat(matfile)
     csc = dict(time=[])
@@ -240,6 +241,7 @@ stop_time = task_times['phase1'][1]
 # plt.plot(u_line.xy[0], u_line.xy[1], 'k.')
 #
 linear_u = linear_trajectory(pos, u_line, start_time, stop_time)
+
 # plt.plot(linear_u, 'b.')
 # plt.show()
 
@@ -313,7 +315,7 @@ sampling_rate = 1/30.
 min_spikes = 100
 # # speed not implemented
 # speed = abs(np.diff(linear_u['position']))
-# speed_threshold = 10
+# # speed_threshold = 10
 filtered_phase2_spikes = dict(time=[])
 for neuron in range(len(phase2_spikes['time'])):
     max_spikes = len(phase2_spikes['time'][neuron]*sampling_rate) * 4
@@ -321,7 +323,8 @@ for neuron in range(len(phase2_spikes['time'])):
     if (len(phase2_spikes['time'][neuron]) > min_spikes) and (len(phase2_spikes['time'][neuron]) <= max_spikes):
         filtered_phase2_spikes['time'].append([phase2_spikes['time'][neuron]])
 
-# print filtered_phase2_spikes
+
+# filtered_phase2_spikes = phase2_spikes
 
 
 linear_start = np.min(linear_u['position'])
@@ -330,26 +333,31 @@ binned_spikes = np.zeros(num_bins)
 bin_edges = np.linspace(linear_start, linear_stop, num=num_bins+1)
 bin_centers = (bin_edges[1:] + bin_edges[:-1]) / 2.
 # print bin_centers
-neuron = 17
+# neuron = 17
 filtered_tc = []
+tuning_curve = []
 for neuron in range(len(filtered_phase2_spikes['time'])):
     spike_z = np.zeros(len(bin_centers))
     for spike_time in filtered_phase2_spikes['time'][neuron]:
-        assigned_bin = find_nearest_idx(linear_u['time'], spike_time)
-        which_bin = find_nearest_idx(bin_centers, linear_u['position'][assigned_bin])
-        spike_z[which_bin] += 1
+        for val in range(len(linear_u['time'])):
+            assigned_bin = find_nearest_idx(linear_u['time'][val], spike_time)
+            which_bin = find_nearest_idx(bin_centers, linear_u['position'][assigned_bin])
+            spike_z[which_bin] += 1
+    tuning_curve.append(spike_z)
     gauss_filter = signal.get_window(('gaussian', 15), 3)
-    other_gauss = ndimage.gaussian_filter(spike_z, sigma=1.0, order=0)
+    # other_gauss = ndimage.gaussian_filter(spike_z, sigma=1.0, order=0)
     filtered_tc.append(np.convolve(spike_z, gauss_filter, mode='same'))
 
 
-for neuron in range(len(filtered_phase2_spikes['time'])):
-    plt.plot(filtered_phase2_spikes['time'][neuron], np.ones(len(filtered_phase2_spikes['time'][neuron]))+neuron+1, '|', color='k')
-plt.plot(linear_u['time'], linear_u['position'], color='r')
-plt.show()
-
-for tc in filtered_tc:
-    plt.plot(tc)
+# for neuron in range(len(filtered_phase2_spikes['time'])):
+#     plt.plot(filtered_phase2_spikes['time'][neuron], np.ones(len(filtered_phase2_spikes['time'][neuron]))+neuron+1, '|', color='k')
+# plt.plot(linear_u['time'], linear_u['position'], color='r')
+# plt.show()
+check = 9
+# print len(filtered_tc), len(tuning_curve)
+# for tc in filtered_tc:
+plt.plot(filtered_tc[check], 'y', lw=3)
+plt.plot(tuning_curve[check], 'g', lw=1)
 plt.show()
 
 # for tcc in other_gauss:

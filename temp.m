@@ -1,104 +1,61 @@
-%filepath = 'C:\Users\Emily\Desktop\R063-2015-03-20_recording';
-filepath = 'C:\Users\Emily\Desktop\R042-2013-08-18';
+laptop_data = 'C:\Users\Emily\Desktop';
+work_data = 'E:\data-shortcut\data-working\Shortcut-20150727';
+laptop_code = 'C:\Users\Emily\Code\Shortcut';
+work_code = 'E:\code\shortcut';
+path_code = laptop_code;
+path_data = laptop_data;
 
-%% input_csc
-cd(filepath);
-cfg_csc = [];
-%cfg_csc.fc = {'R063-2015-03-20-CSC04a.ncs'};
-cfg_csc.fc = {'R042-2013-08-18-CSC11a.ncs'};
-csc = LoadCSC(cfg_csc);
+rat_id = 'R063_EI';
+cd(fullfile(path_code, 'expkeys'))
+expday = emi_expday(rat_id);
+unique_folder = expday.two;
+unique_id = unique_folder(1:15);
 
-csc_type = csc.type;
-csc_tvec = csc.tvec;
-csc_data = csc.data;
-csc_label = csc.label;
+expkeys = emi_loadExpKeys(unique_folder);
 
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\inputs_csc', ...
-    'csc_data', 'csc_tvec', 'csc_type', 'csc_label')
+% cd(fullfile(path_data, rat_id, unique_folder));
+cd(fullfile(path_data, unique_folder));
+start_phase = expkeys.phase2(1);
+end_phase = expkeys.phase2(2);
+boundary1 = 'feeder1';
+boundary2 = 'feeder2';
 
-%% input_positions
-cd(filepath);
-cfg_pos = [];
-position = LoadPos(cfg_pos);
+% Get position
+if exist([unique_id,'-emi-vt.mat'],'file');
+    fprintf('*-emi-vt.mat file found, loading.\n');
+    load([unique_id,'-emi-vt.mat']);
+else
+    pos_tsd = emi_position(unique_folder,expkeys);
+end
 
-pos_type = position.type;
-pos_tvec = position.tvec;
-pos_datax = position.data(1,:);
-pos_datay = position.data(2,:);
-pos_label = position.label;
+% Linear position
+[z, z_iv] = emi_linearize(pos_tsd, expkeys, start_phase, end_phase, boundary1, boundary2);
 
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_position', ...
-    'pos_datax', 'pos_datay', 'pos_tvec', 'pos_type', 'pos_label')
+% Tuning doesn't use z_dist
+z.u.data = z.u.data(1,:);
 
-%% input events for shortcut 
+zlin = z.u;
+zlin_iv = z_iv.u;
+plot(zlin);
 
-ExpKeys.led1id = 'TTL Output on AcqSystem1_0 board 0 port 2 value (0x0001).'; 
-ExpKeys.led2id = 'TTL Output on AcqSystem1_0 board 0 port 2 value (0x0002).';
-ExpKeys.ledoff = 'TTL Output on AcqSystem1_0 board 0 port 2 value (0x0000).';
-ExpKeys.pb1id = 'TTL Input on AcqSystem1_0 board 0 port 1 value (0x0040).';
-ExpKeys.pb2id = 'TTL Input on AcqSystem1_0 board 0 port 1 value (0x0020).';
-ExpKeys.pboff = 'TTL Input on AcqSystem1_0 board 0 port 1 value (0x0000).';
-ExpKeys.feeder1id = 'TTL Output on AcqSystem1_0 board 0 port 0 value (0x0004).';
-ExpKeys.feeder2id = 'TTL Output on AcqSystem1_0 board 0 port 0 value (0x0040).';
-ExpKeys.feederoff = 'TTL Output on AcqSystem1_0 board 0 port 0 value (0x0000).';
+% Filtering neurons using emi_spikes_filtered.m
+cfg = [];
+cfg.load_questionable_cells = 1;
+cfg.useClustersFile = 0;
+spikes = LoadSpikes(cfg);
+spikes_filtered = spikes_filtered_shortcut(spikes, pos_tsd, zlin, zlin_iv, expkeys);
 
-cd(filepath);
-cfg_evt = [];
-cfg.evt.eventList = {'TTL Output on AcqSystem1_0 board 0 port 2 value (0x0001).'; ...
-                     'TTL Output on AcqSystem1_0 board 0 port 2 value (0x0002).'; ...
-                     'TTL Output on AcqSystem1_0 board 0 port 2 value (0x0000).'; ...
-                     'TTL Input on AcqSystem1_0 board 0 port 1 value (0x0040).'; ...
-                     'TTL Input on AcqSystem1_0 board 0 port 1 value (0x0020).'; ...
-                     'TTL Input on AcqSystem1_0 board 0 port 1 value (0x0000).'; ...
-                     'TTL Output on AcqSystem1_0 board 0 port 0 value (0x0004).'; ...
-                     'TTL Output on AcqSystem1_0 board 0 port 0 value (0x0040).'; ...
-                     'TTL Output on AcqSystem1_0 board 0 port 0 value (0x0000).'};
-cfg.eventLabel = {'led1id', 'led2id', 'ledoff', 'pb1id', 'pb2id', 'pboff', ...
-                  'feeder1id', 'feeder2id', 'feederoff'};
+% Making the tuning curves
+z_min = min(zlin.data(1,:));
+z_max = max(zlin.data(1,:));
+binsize = 3;
+cfg = [];
+cfg.binEdges{1} = z_min:binsize:z_max;
+cfg.smoothingKernel = gausskernel(15,3); % (wide by std dev)
+clear tc;
+tc = TuningCurves(cfg, spikes, zlin);
 
-evt = LoadEvents(cfg_evt);
-evt_type = evt.type;
-evt_led1id = evt.t{1};
-evt_led2id = evt.t{2};
-evt_ledoff = evt.t{3};
-evt_pb1id = evt.t{4};
-evt_pb2id = evt.t{5};
-evt_pboff = evt.t{6};
-evt_feeder1id = evt.t{7};
-evt_feeder2id = evt.t{8};
-evt_feederoff = evt.t{9};
-evt_label = evt.label;
-
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_event', ...
-     'evt_led1id', 'evt_led2id', 'evt_ledoff', 'evt_pb1id', 'evt_pb2id', ...
-     'evt_pboff', 'evt_feeder1id', 'evt_feeder2id', 'evt_feederoff', ...
-     'evt_type', 'evt_label')
-
-%% input_events for Alyssa's t-maze
-cd(filepath);
-cfg_evt = [];
-cfg_evt.eventList = {'TTL Output on AcqSystem1_0 board 0 port 0 value (0x0004).','TTL Output on AcqSystem1_0 board 0 port 0 value (0x0040).'};
-cfg_evt.eventLabel = {'FoodDelivery','WaterDelivery'};
-
-evt = LoadEvents(cfg_evt);
-
-evt_type = evt.type;
-evt_food = evt.t{1};
-evt_water = evt.t{2};
-evt_label = evt.label;
-
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\inputs_event', ...
-    'evt_food', 'evt_water', 'evt_type', 'evt_label')
-
-%% input_spikes
-cd(filepath);
-cfg_spk = [];
-
-spikes = LoadSpikes(cfg_spk);
-
-spikes_type = spikes.type;
-spikes_times = spikes.t;
-spikes_label = spikes.label;
-
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_spike', ...
-    'spikes_times', 'spikes_label', 'spikes_type')
+check = 12;
+figure(1); clf; hold on;
+% plot(tc.tc(check,:));
+imagescnan(squeeze(tc.tc(check,:)));
