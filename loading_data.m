@@ -1,11 +1,13 @@
-%filepath = 'C:\Users\Emily\Desktop\R063-2015-03-20_recording';
-filepath = 'C:\Users\Emily\Desktop\R042-2013-08-18';
+filepath = 'C:\Users\Emily\Desktop\R063-2015-03-20_recording';
+% filepath = 'C:\Users\Emily\Desktop\R063-2015-03-22_recording';
+% filepath = 'C:\Users\Emily\Desktop\R042-2013-08-18';
 
 %% input_csc
 cd(filepath);
 cfg_csc = [];
-%cfg_csc.fc = {'R063-2015-03-20-CSC04a.ncs'};
-cfg_csc.fc = {'R042-2013-08-18-CSC11a.ncs'};
+% cfg_csc.fc = {'R063-2015-03-20-CSC04a.ncs'};
+cfg_csc.fc = {'R063-2015-03-22-CSC05c.ncs'};
+% cfg_csc.fc = {'R042-2013-08-18-CSC11a.ncs'};
 csc = LoadCSC(cfg_csc);
 
 csc_type = csc.type;
@@ -13,7 +15,7 @@ csc_tvec = csc.tvec;
 csc_data = csc.data;
 csc_label = csc.label;
 
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\inputs_csc', ...
+save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_csc', ...
     'csc_data', 'csc_tvec', 'csc_type', 'csc_label')
 
 %% input_positions

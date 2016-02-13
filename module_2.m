@@ -1,7 +1,7 @@
-cd('C:\Users\Emily\Desktop\R016-2012-10-08_promoted'); % same session as Module 1
+cd('C:\Users\Emily\Desktop\R042-2013-08-18'); % same session as Module 1
 
 cfg_csc = [];
-cfg_csc.fc = {'R016-2012-10-08-CSC02d.ncs'};
+cfg_csc.fc = {'R042-2013-08-18-CSC12a.ncs'};
 csc = LoadCSC(cfg_csc);
 
 cfg_evt = [];
