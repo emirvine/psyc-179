@@ -17,3 +17,11 @@ Thumbs.db
 # PyCharm project thing #
 ##############################
 *.idea/
+
+# Latex #
+##############################
+*.aux
+*.bbl
+*.blg
+*.log
+*.pdf
