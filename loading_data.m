@@ -1,13 +1,12 @@
+% Change this filepath to where this data is located on your computer.
+% Below works only on Emily's laptop.
 filepath = 'C:\Users\Emily\Desktop\R063-2015-03-20_recording';
-% filepath = 'C:\Users\Emily\Desktop\R063-2015-03-22_recording';
-% filepath = 'C:\Users\Emily\Desktop\R042-2013-08-18';
+
 
 %% input_csc
 cd(filepath);
 cfg_csc = [];
-% cfg_csc.fc = {'R063-2015-03-20-CSC04a.ncs'};
-cfg_csc.fc = {'R063-2015-03-22-CSC05c.ncs'};
-% cfg_csc.fc = {'R042-2013-08-18-CSC11a.ncs'};
+cfg_csc.fc = {'R063-2015-03-20-CSC04a.ncs'};
 csc = LoadCSC(cfg_csc);
 
 csc_type = csc.type;
@@ -17,6 +16,7 @@ csc_label = csc.label;
 
 save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_csc', ...
     'csc_data', 'csc_tvec', 'csc_type', 'csc_label')
+
 
 %% input_positions
 cd(filepath);
@@ -31,6 +31,7 @@ pos_label = position.label;
 
 save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_position', ...
     'pos_datax', 'pos_datay', 'pos_tvec', 'pos_type', 'pos_label')
+
 
 %% input events for shortcut 
 
@@ -75,22 +76,7 @@ save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_event', ...
      'evt_led1id', 'evt_led2id', 'evt_ledoff', 'evt_pb1id', 'evt_pb2id', ...
      'evt_pboff', 'evt_feeder1id', 'evt_feeder2id', 'evt_feederoff', ...
      'evt_type', 'evt_label')
-
-%% input_events for Alyssa's t-maze
-cd(filepath);
-cfg_evt = [];
-cfg_evt.eventList = {'TTL Output on AcqSystem1_0 board 0 port 0 value (0x0004).','TTL Output on AcqSystem1_0 board 0 port 0 value (0x0040).'};
-cfg_evt.eventLabel = {'FoodDelivery','WaterDelivery'};
-
-evt = LoadEvents(cfg_evt);
-
-evt_type = evt.type;
-evt_food = evt.t{1};
-evt_water = evt.t{2};
-evt_label = evt.label;
-
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\inputs_event', ...
-    'evt_food', 'evt_water', 'evt_type', 'evt_label')
+ 
 
 %% input_spikes
 cd(filepath);

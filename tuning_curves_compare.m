@@ -42,7 +42,6 @@ z_max = max(linear_z.data(1,:));
 binsize = 3;
 cfg = [];
 cfg.binEdges{1} = z_min:binsize:z_max;
-% cfg.smoothingKernel = gausskernel(15,3); % (wide by std dev)
 clear tc;
 tc = TuningCurves(cfg, spikes_phase, linear_z);
 
