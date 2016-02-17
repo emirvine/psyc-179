@@ -285,8 +285,7 @@ end
 
 %% Average by lap
 trial_id = zeros(size(q_time_centers));
-run_start = ExpKeys.TimeOnTrack;
-trial_idx = nearest_idx3(run_start, q_time_centers);
+trial_idx = nearest_idx3(metadata.taskvars.trial_iv.tstart, q_time_centers);
 trial_id(trial_idx) = 1;
 trial_id = cumsum(trial_id);
 
