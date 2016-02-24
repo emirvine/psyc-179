@@ -262,3 +262,164 @@ iC = 1; % which signal pair to plot
 lbl = [fd.labelcmb{1,:}]; % get the label of this pair
 imagesc(fd.time,fd.freq,sq(fd.cohspctrm(iC,:,:))); axis xy; colorbar
 xlabel('time (s)'); ylabel('Frequency (Hz)'); title(lbl);
+
+%%
+cfg            = [];
+cfg.method     = 'ppc';
+fd             = ft_connectivityanalysis(cfg,TFR_pre);
+imagesc(fd.time,fd.freq,sq(fd.ppcspctrm(iC,:,:))); axis xy; colorbar
+xlabel('time (s)'); ylabel('Frequency (Hz)'); title(lbl);
+
+
+%% Granger causality
+cfg = [];
+cfg.ntrials = 1000;
+cfg.triallength = 5; % in seconds
+cfg.fsample = 1000;
+cfg.nsignal = 2; % two signals, X and Y, which start out as identical white noise
+ 
+cfg.method = 'linear_mix';
+cfg.mix = [0; 0]; % multiply white noise for X and Y by this
+cfg.delay = [0; 0]; % Y is n samples delayed relative to X (both 0)
+cfg.bpfilter = 'no';
+cfg.absnoise = 1; % add independent noise to both signals, so now X and Y should be independent
+ 
+data = ft_connectivitysimulation(cfg);
+data.label = {'X','Y'};
+
+cfg_ar = [];
+cfg_ar.order = 3;
+cfg_ar.toolbox = 'bsmart';
+mdata = ft_mvaranalysis(cfg_ar, data);
+
+figure; subplot(221);
+ 
+labels = {'X->X','X->Y';'Y->X','Y->Y'}; 
+cols = 'rgbc';
+nP = 0;
+for iI = 1:cfg.nsignal   
+    for iJ = 1:cfg.nsignal
+        nP = nP + 1;
+        h(nP) = plot(1:cfg_ar.order,sq(mdata.coeffs(iI,iJ,:)),cols(nP));
+        hold on;
+        plot(1:cfg_ar.order,sq(mdata.coeffs(iI,iJ,:)),'.','MarkerSize',20,'Color',cols(nP));
+    end
+end
+set(gca,'FontSize',18,'LineWidth',1); box off;
+set(h,'LineWidth',2);
+%xlabel('lag (samples)'); ylabel('coefficient');
+title('cfg.delay = [0; 0];');
+legend(h,labels(:));
+
+%%
+cfg.mix = [0.8; 0.8]; % X and Y are identical white noise with amplitude 0.8
+cfg.absnoise = 0.2; % add amplitude 0.2 *independent* noise
+cfg.delay = [0; 2]; % advance Y 2 samples relative to X
+ 
+data = ft_connectivitysimulation(cfg);
+data.label = {'X','Y'};
+
+%% spectrally resolved Granger causality
+nTrials = 1000;
+ 
+cfg = [];
+cfg.ntrials = nTrials;
+cfg.triallength = 5;
+cfg.fsample = 1000;
+cfg.nsignal = 2;
+ 
+cfg.method = 'linear_mix';
+cfg.mix = [0.5; 0.5];
+cfg.delay = [0; 4];
+cfg.bpfilter = 'yes';
+cfg.bpfreq = [50 100]; % white noise gets filtered in this frequency band
+cfg.absnoise = 0.5; % add independent noise to both signals
+ 
+data = ft_connectivitysimulation(cfg);
+data.label = {'X','Y'};
+
+%%
+cfg = [];
+cfg.ntrials = nTrials;
+cfg.triallength = 5;
+cfg.fsample = 1000;
+cfg.nsignal = 2;
+ 
+cfg.method = 'linear_mix';
+cfg.mix = [1; 0.5]; % X bigger than Y
+cfg.delay = [0; 0];
+cfg.bpfilter = 'yes';
+cfg.bpfreq = [50 100]; % white noise gets filtered in this frequency band
+cfg.absnoise = 0.5; % add independent noise to both signals
+ 
+data = ft_connectivitysimulation(cfg);
+data.label = {'X','Y'};
+
+
+
+cfg_TFR = [];
+cfg_TFR.channel = {'X','Y'};
+cfg_TFR.channelcmb = {'X' 'Y'};
+cfg_TFR.method = 'mtmfft';
+cfg_TFR.output = 'fourier';
+cfg_TFR.foi = 1:1:150;
+cfg_TFR.taper = 'hanning';
+ 
+TFR = ft_freqanalysis(cfg_TFR,data);
+
+cfg_G = [];
+cfg_G.method = 'granger';
+cfg_G.channel = {'X','Y'};
+cfg_G.channelcmb = {'X' 'Y'};
+ 
+C = ft_connectivityanalysis(cfg_G,TFR);
+
+figure;
+for iP = 1:4
+    subplot(2,2,iP);
+    plot(C.freq,C.grangerspctrm(iP,:));
+    set(gca,'FontSize',14,'YLim',[0 0.5]);
+    title([C.labelcmb{iP,:}]);
+end
+
+%% Phase-slope index
+nTrials = 1000;
+ 
+cfg = [];
+cfg.ntrials = nTrials;
+cfg.triallength = 5;
+cfg.fsample = 1000;
+cfg.nsignal = 2;
+ 
+cfg.method = 'linear_mix';
+cfg.mix = [1; 0.3]; % X bigger than Y
+cfg.delay = [0; 4];
+cfg.bpfilter = 'yes';
+cfg.bpfreq = [50 100]; % white noise gets filtered in low gamma band
+cfg.absnoise = 0.5; % add independent noise to both signals
+ 
+data = ft_connectivitysimulation(cfg);
+data.label = {'X','Y'};
+
+cfg_TFR = [];
+cfg_TFR.channel = {'X','Y'};
+cfg_TFR.channelcmb = {'X' 'Y'};
+cfg_TFR.method = 'mtmfft';
+cfg_TFR.output = 'fourier';
+cfg_TFR.foi = 1:1:150;
+cfg_TFR.taper = 'hanning';
+ 
+TFR = ft_freqanalysis(cfg_TFR,data);
+
+cfg_psi = [];
+cfg_psi.method = 'psi';
+cfg_psi.bandwidth = 8; % number of frequencies to compute slope over
+cfg_psi.channel = {'X','Y'};
+cfg_psi.channelcmb = {'X' 'Y'};
+ 
+C = ft_connectivityanalysis(cfg_psi,TFR);
+
+figure;
+plot(C.freq,sq(C.psispctrm(2,1,:)));
+xlabel('Frequency'); ylabel('Phase slope');
+
