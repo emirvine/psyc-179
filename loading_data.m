@@ -1,12 +1,12 @@
 % Change this filepath to where this data is located on your computer.
 % Below works only on Emily's laptop.
-filepath = 'C:\Users\Emily\Desktop\R063-2015-03-20_recording';
+filepath = 'C:\Users\Emily\Desktop\R063-2015-03-22_recording';
 
 
 %% input_csc
 cd(filepath);
 cfg_csc = [];
-cfg_csc.fc = {'R063-2015-03-20-CSC04a.ncs'};
+cfg_csc.fc = {'R063-2015-03-22-CSC04a.ncs'};
 csc = LoadCSC(cfg_csc);
 
 csc_type = csc.type;
@@ -14,7 +14,7 @@ csc_tvec = csc.tvec;
 csc_data = csc.data;
 csc_label = csc.label;
 
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_csc', ...
+save(strcat(filepath,'\emi_inputs_csc'), ...
     'csc_data', 'csc_tvec', 'csc_type', 'csc_label')
 
 
@@ -29,7 +29,7 @@ pos_datax = position.data(1,:);
 pos_datay = position.data(2,:);
 pos_label = position.label;
 
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_position', ...
+save(strcat(filepath,'\emi_inputs_position'), ...
     'pos_datax', 'pos_datay', 'pos_tvec', 'pos_type', 'pos_label')
 
 
@@ -72,7 +72,7 @@ evt_feeder2id = evt.t{8};
 evt_feederoff = evt.t{9};
 evt_label = evt.label;
 
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_event', ...
+save(strcat(filepath,'\emi_inputs_event'), ...
      'evt_led1id', 'evt_led2id', 'evt_ledoff', 'evt_pb1id', 'evt_pb2id', ...
      'evt_pboff', 'evt_feeder1id', 'evt_feeder2id', 'evt_feederoff', ...
      'evt_type', 'evt_label')
@@ -88,5 +88,5 @@ spikes_type = spikes.type;
 spikes_times = spikes.t;
 spikes_label = spikes.label;
 
-save('C:\Users\Emily\Dropbox\Graduate courses\psyc-179\emi_inputs_spike', ...
+save(strcat(filepath,'\emi_inputs_spike'), ...
     'spikes_times', 'spikes_label', 'spikes_type')
