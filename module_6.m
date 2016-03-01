@@ -78,7 +78,7 @@ fvtool(h);
 
 
 %% data application
-cd('C:\Users\Emily\Desktop\R042-2013-08-18');
+cd('C:\Users\EmilyWork\Desktop\R042-2013-08-18');
 cfg = [];
 cfg.fc = {'R042-2013-08-18-CSC08a.ncs'};
 csc = LoadCSC(cfg);
