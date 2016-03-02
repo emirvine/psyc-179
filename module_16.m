@@ -86,7 +86,7 @@ end
 
 [~, remove.left, remove.right] = intersect(fields.left, fields.right);
 for side = 1:length(sides)
-    fields.(sides{side})(remove.left) = [];
+    fields.(sides{side})(remove.(sides{side})) = [];
     fields.(sides{side}) = unique(fields.(sides{side}));
     spikes_side.(sides{side}) = SelectTS([], spikes, fields.(sides{side}));
 end
