@@ -80,7 +80,10 @@ save(strcat(filepath,'\emi_inputs_event'), ...
 
 %% input_spikes
 cd(filepath);
+
 cfg_spk = [];
+cfg_spk.uint = '64';
+cfg_spk.load_questionable_cells = 1;
 
 spikes = LoadSpikes(cfg_spk);
 

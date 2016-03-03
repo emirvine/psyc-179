@@ -39,6 +39,16 @@ swr_evt = TSDtoIV(cfg, swr);
 clearvars -except spikes pos swr_evt ExpKeys
 
 
+%% Load track spikes .mat
+load('spike_pos_R063d3.mat');
+
+for neuron = 1:length(spike_pos.u)
+    spike_pos.u{neuron} = spike_pos.u{neuron}';
+    spike_pos.shortcut{neuron} = spike_pos.shortcut{neuron}';
+    spike_pos.novel{neuron} = spike_pos.novel{neuron}';
+    spike_pos.other{neuron} = spike_pos.other{neuron}';
+end
+
 %% Estimating place fields
 linspeed = getLinSpd([], pos);
 
