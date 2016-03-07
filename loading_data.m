@@ -1,12 +1,12 @@
 % Change this filepath to where this data is located on your computer.
 % Below works only on Emily's laptop.
-filepath = 'C:\Users\Emily\Desktop\R063-2015-03-22_recording';
+filepath = 'C:\Users\Emily\Desktop\R063-2015-03-23_recording';
 
 
 %% input_csc
 cd(filepath);
 cfg_csc = [];
-cfg_csc.fc = {'R063-2015-03-22-CSC04a.ncs'};
+cfg_csc.fc = {'R063-2015-03-23-CSC11b.ncs'};
 csc = LoadCSC(cfg_csc);
 
 csc_type = csc.type;

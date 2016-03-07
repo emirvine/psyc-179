@@ -1,45 +1,45 @@
-load('spike_pos_R063d3.mat');
-
-for neuron = 1:length(spike_pos.u)
-    spike_pos.u{neuron} = spike_pos.u{neuron}';
-    spike_pos.shortcut{neuron} = spike_pos.shortcut{neuron}';
-    spike_pos.novel{neuron} = spike_pos.novel{neuron}';
-    spike_pos.other{neuron} = spike_pos.other{neuron}';
-end
-
-
-% laptop_data = 'C:\Users\Emily\Desktop';
-% work_data = 'E:\data-shortcut\data-working\Shortcut-20150727';
-% laptop_code = 'C:\Users\Emily\Code\Shortcut';
-% work_code = 'E:\code\shortcut';
-% path_code = laptop_code;
-% path_data = laptop_data;
+% load('spike_pos_R063d3.mat');
 % 
-% % Loading the data. Here from R063-2015-03-20_recording.
-% rat_id = 'R063_EI';
-% cd(fullfile(path_code, 'expkeys'))
-% expday = emi_expday(rat_id);
-% unique_folder = expday.two;
-% unique_id = unique_folder(1:15);
-% 
-% expkeys = emi_loadExpKeys(unique_folder);
-% 
-% cd(fullfile(path_data, unique_folder));
-% start_phase = expkeys.phase2(1);
-% end_phase = expkeys.phase2(2);
-% 
-% % Loading spikes
-% cfg = [];
-% spikes = LoadSpikes(cfg);
-% spikes_phase = restrict(spikes, start_phase, end_phase);
-% 
-% % Get XY position
-% if exist([unique_id,'-emi-vt.mat'],'file');
-%     fprintf('*-emi-vt.mat file found, loading.\n');
-%     load([unique_id,'-emi-vt.mat']);
-% else
-%     pos_tsd = emi_position(unique_folder,expkeys);
+% for neuron = 1:length(spike_pos.u)
+%     spike_pos.u{neuron} = spike_pos.u{neuron}';
+%     spike_pos.shortcut{neuron} = spike_pos.shortcut{neuron}';
+%     spike_pos.novel{neuron} = spike_pos.novel{neuron}';
+%     spike_pos.other{neuron} = spike_pos.other{neuron}';
 % end
+
+
+laptop_data = 'C:\Users\Emily\Desktop';
+work_data = 'E:\data-shortcut\data-working\Shortcut-20150727';
+laptop_code = 'C:\Users\Emily\Code\Shortcut';
+work_code = 'E:\code\shortcut';
+path_code = laptop_code;
+path_data = laptop_data;
+
+% Loading the data. Here from R063-2015-03-20_recording.
+rat_id = 'R063_EI';
+cd(fullfile(path_code, 'expkeys'))
+expday = emi_expday(rat_id);
+unique_folder = expday.four;
+unique_id = unique_folder(1:15);
+
+expkeys = emi_loadExpKeys(unique_folder);
+
+cd(fullfile(path_data, unique_folder));
+start_phase = expkeys.phase2(1);
+end_phase = expkeys.phase2(2);
+
+% Loading spikes
+cfg = [];
+spikes = LoadSpikes(cfg);
+spikes_phase = restrict(spikes, start_phase, end_phase);
+
+% Get XY position
+if exist([unique_id,'-emi-vt.mat'],'file');
+    fprintf('*-emi-vt.mat file found, loading.\n');
+    load([unique_id,'-emi-vt.mat']);
+else
+    pos_tsd = emi_position(unique_folder, expkeys);
+end
 % 
 % % Linear position
 % boundary1 = 'feeder1';

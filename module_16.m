@@ -101,7 +101,7 @@ end
 %% Co-activation probabilities
 for side = 1:length(sides)
     cfg = [];
-    cfg.nShuffle = 1000;
+    cfg.nShuffle = 10000;
     cfg.useMask = 1;
     cfg.outputFormat = 'vectorU';
     cooccur.(sides{side}) = CoOccurQ2(cfg, q.(sides{side}));

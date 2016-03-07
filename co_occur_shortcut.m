@@ -1,21 +1,22 @@
-cd('C:\Users\Emily\Desktop\R063-2015-03-22_recording');
+cd('C:\Users\Emily\Desktop\R063-2015-03-23_recording');
 LoadExpKeys;
+
 
 %% Get SWR events
 cfg = [];
-cfg.fc = {'R063-2015-03-22-CSC14d.ncs'};
+cfg.fc = ExpKeys.good_lfp;
 csc = LoadCSC(cfg);
+
+csc = restrict(csc, ExpKeys.pauseA(1), ExpKeys.pauseA(2));
 
 cfg = [];
 cfg.load_questionable_cells = 1;
 spikes = LoadSpikes(cfg);
 
-load('R063-2015-03-22-emi-vt.mat');
+load('R063-2015-03-23-emi-vt.mat');
 
 pos_tsd.data(1,:) = pos_tsd.data(1,:)./ExpKeys.pxl_to_cm(1); 
 pos_tsd.data(2,:) = pos_tsd.data(2,:)./ExpKeys.pxl_to_cm(2);
-
-pos = pos_tsd;
 
 cfg = [];
 cfg.type = 'fdesign';
@@ -36,57 +37,43 @@ cfg.minlen = 0.02;
 cfg.merge_thr = 0;
 swr_evt = TSDtoIV(cfg, swr);
 
-clearvars -except spikes pos swr_evt ExpKeys
+clearvars -except pos_tsd swr_evt ExpKeys spikes
 
 
 %% Load track spikes .mat
-load('spike_pos_R063d3.mat');
+% load('spike_pos_14_R063d3.mat');
+load('spike_pos_R063d4.mat');
+% load('saved_struct.mat');
 
-for neuron = 1:length(spike_pos.u)
-    spike_pos.u{neuron} = spike_pos.u{neuron}';
-    spike_pos.shortcut{neuron} = spike_pos.shortcut{neuron}';
-    spike_pos.novel{neuron} = spike_pos.novel{neuron}';
-    spike_pos.other{neuron} = spike_pos.other{neuron}';
+trajectories = {'novel', 'shortcut', 'u'};
+for side = 1:length(trajectories)
+    spikes_track.(trajectories{side}) = ts;
+    spikes_track.(trajectories{side}).usr = spikes.usr;
+    spikes_track.(trajectories{side}).t = spike_pos.(trajectories{side});
 end
 
 %% Estimating place fields
-linspeed = getLinSpd([], pos);
+linspeed = getLinSpd([], pos_tsd);
 
 cfg = [];
 cfg.method = 'raw';
-cfg.operation = '>';
+cfg.dcn = '>';
 cfg.threshold = 3.5;
 iv_fast = TSDtoIV(cfg, linspeed);
 
-pos_fast = restrict(pos, iv_fast); 
-spikes_fast = restrict(spikes, iv_fast);
+pos_fast = restrict(pos_tsd, iv_fast); 
+
+for side = 1:length(trajectories)
+    spikes_fast.(trajectories{side}) = ts;
+    spikes_fast.(trajectories{side}).usr = spikes.usr;
+    spikes_fast.(trajectories{side}) = restrict(spikes_track.(trajectories{side}), iv_fast);
+end
+
 
 % plot(getd(pos_fast, 'x'), getd(pos_fast, 'y'), 'b')
 
 
 %% Extracting trials
-novels = iv;
-novels.tstart = ExpKeys.novel_start;
-novels.tend = ExpKeys.novel_stop;
-
-shortcuts = iv;
-shortcuts.tstart = ExpKeys.shortcut_start;
-shortcuts.tend = ExpKeys.shortcut_stop;
-
-us = iv;
-us.tstart = ExpKeys.u_start;
-us.tend = ExpKeys.u_stop;
-
-trials = struct();
-trials.novel = novels;
-trials.shortcut = shortcuts;
-trials.u = us;
-
-trajectories = {'novel', 'shortcut', 'u'};
-for side = 1:length(trajectories)
-    pos_trial.(trajectories{side}) = restrict(pos_fast, trials.(trajectories{side}));
-    spikes_trial.(trajectories{side}) = restrict(spikes_fast, trials.(trajectories{side}));
-end
 
 linear.novel = linear_shortcut(pos_fast, ExpKeys, 'novel1', 'novel2');
 linear.shortcut = linear_shortcut(pos_fast, ExpKeys, 'shortcut1', 'shortcut2');
@@ -95,14 +82,15 @@ linear.u = linear_shortcut(pos_fast, ExpKeys, 'feeder1', 'feeder2');
 for side = 1:length(trajectories)
     cfg = [];
     cfg.binSize = 1;
-    tc.(trajectories{side}) = MakeTC(cfg, spikes_trial.(trajectories{side}), linear.(trajectories{side}));
+    tc.(trajectories{side}) = MakeTC(cfg, spikes_fast.(trajectories{side}), linear.(trajectories{side}));
     fields.(trajectories{side}) = tc.(trajectories{side}).field_template_idx;
 end
 
 %% check point
 figure(1); clf; hold on;
-for tuning = 1:size(tc.shortcut.tc, 1)
-    plot(tc.shortcut.tc(tuning,:), 'b', 'LineWidth', 2);
+tc_plot = tc.novel.tc;
+for tuning = 1:size(tc_plot, 1)
+    plot(tc_plot(tuning,:), 'b', 'LineWidth', 2);
 end
 set(gca,'FontSize',14); xlabel('Linearized position (cm)'); ylabel('Firing rate (Hz)');
 
@@ -124,6 +112,14 @@ for side = 1:length(u_novel)
     spikes_side.(u_novel{side}) = SelectTS([], spikes, fields.(u_novel{side}));
 end
 
+[~, remove.shortcut, remove.novel] = intersect(fields.shortcut, fields.novel);
+shortcut_novel = {'shortcut', 'novel'};
+for side = 1:length(shortcut_novel)
+    fields.(shortcut_novel{side})(remove.(shortcut_novel{side})) = [];
+    fields.(shortcut_novel{side}) = unique(fields.(shortcut_novel{side}));
+    spikes_side.(shortcut_novel{side}) = SelectTS([], spikes, fields.(shortcut_novel{side}));
+end
+
 
 %% Make a Q matrix
 for side = 1:length(trajectories)
@@ -136,7 +132,7 @@ end
 %% Co-activation probabilities
 for side = 1:length(trajectories)
     cfg = [];
-    cfg.nShuffle = 1000;
+    cfg.nShuffle = 10000;
     cfg.useMask = 1;
     cfg.outputFormat = 'vectorU';
     cooccur.(trajectories{side}) = CoOccurQ2(cfg, q.(trajectories{side}));
@@ -144,47 +140,6 @@ end
 
 
 %% Plotting
-colors = flipud(linspecer(3));
-location = [1, 2, 3];
-xticklabel = {'Novel', 'Shortcut', 'U'};
-
-p0_data = [nanmean(cooccur.novel.p0), nanmean(cooccur.shortcut.p0), nanmean(cooccur.u.p0)];
-
-figure(1);
-for side = 1:length(p0_data)
-    bar(location(side), p0_data(side), 'FaceColor', colors(side, :), 'EdgeColor', 'none');
-    hold on;
-end
-set(gca, 'XLim', [location(1)-1, location(2)+1], 'XTick', location, 'XTickLabel', xticklabel);
-xlabel('Field location');
-ylabel({'Proportion of'; 'SWRs active'});
-title('Activation probability (p0)');
-
-p3_data = [nanmean(cooccur.novel.p3), nanmean(cooccur.shortcut.p3), nanmean(cooccur.u.p3)];
-
-figure(2);
-for side = 1:length(p3_data)
-    bar(location(side), p3_data(side), 'FaceColor', colors(side, :), 'EdgeColor', 'none');
-    hold on;
-end
-set(gca, 'XLim', [location(1)-1, location(2)+1], 'XTick', location, 'XTickLabel', xticklabel);
-xlabel('Field location');
-ylabel({'Cell pair'; 'joint probability'});
-title('Observed coactivity (p3)');
-
-p4_data = [nanmean(cooccur.novel.p4), nanmean(cooccur.shortcut.p4), nanmean(cooccur.u.p4)];
-
-figure(3);
-for side = 1:length(p4_data)
-    bar(location(side), p4_data(side), 'FaceColor', colors(side, :), 'EdgeColor', 'none');
-    hold on;
-end
-set(gca, 'XLim', [location(1)-1, location(2)+1], 'XTick', location, 'XTickLabel', xticklabel);
-xlabel('Field location');
-ylabel({'SWR coactivation'; 'z-scored'});
-title('Coactivation above chance levels (p4)');
-
-%% All plots together
 p_list = {'p0', 'p3', 'p4'};
 titles = {'Activation probability (p0)', 'Observed coactivity (p3)', 'Coactivation above chance levels (p4)'};
 ylabels = {{'Proportion of'; 'SWRs active'}, {'Cell pair'; 'joint probability'}, {'SWR coactivation'; 'z-scored'}};
@@ -207,6 +162,6 @@ for prob = length(p_list):-1:1
     end
 end
 
-set(fig, 'XLim', [location(1)-1, location(3)+1], 'XTick', location, 'XTickLabel', xticklabel);
+set(fig, 'XLim', [location(1)-1, location(3)+1], 'XTick', location, 'XTickLabel', xticklabel, 'FontSize', 12);
 set(fig, 'PlotBoxAspectRatio', [1, 1, 1]);
 maximize
